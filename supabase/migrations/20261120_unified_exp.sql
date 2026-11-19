@@ -27,6 +27,16 @@ create table if not exists public.member_exp_transactions (
 create unique index if not exists member_exp_badge_once
   on public.member_exp_transactions(member_id,source_type,source_key)
   where source_type='badge' and source_key is not null;
+
+-- Marca a primeira concessão, inclusive quando a recompensa da badge for zero.
+-- Assim não há EXP retroativa ao alterar a recompensa e reconceder a badge.
+create table if not exists public.member_badge_exp_claims (
+  member_id uuid not null references public.profiles(id) on delete cascade,
+  badge_id uuid not null,
+  claimed_at timestamptz not null default now(),
+  primary key(member_id,badge_id)
+);
+revoke all on public.member_badge_exp_claims from anon,authenticated;
 create index if not exists member_exp_member_created_idx
   on public.member_exp_transactions(member_id,created_at desc);
 
@@ -222,3 +232,33 @@ begin
 end;
 $$;
 grant execute on function public.admin_update_staff_permissions(jsonb) to authenticated;
+
+-- Garante que a recompensa seja creditada no máximo uma vez por membro/badge,
+-- mesmo se a badge for retirada e concedida novamente ou seu valor mudar.
+create or replace function public.admin_grant_badge(p_member_id uuid,p_badge_id uuid)
+returns void language plpgsql security definer set search_path=public as $$
+declare v_inserted integer; v_claimed integer;
+begin
+  if not public.has_portal_permission('grant_badges') then
+    raise exception 'Você não tem permissão para conceder badges.';
+  end if;
+  insert into public.member_badges(member_id,badge_id,granted_by)
+  values(p_member_id,p_badge_id,auth.uid())
+  on conflict(member_id,badge_id) do nothing;
+  get diagnostics v_inserted = row_count;
+  if v_inserted > 0 then
+    insert into public.member_badge_exp_claims(member_id,badge_id)
+    values(p_member_id,p_badge_id) on conflict(member_id,badge_id) do nothing;
+    get diagnostics v_claimed = row_count;
+    if v_claimed > 0 then
+      insert into public.member_exp_transactions(member_id,amount,source_type,source_key,reason,created_by)
+      select p_member_id,b.exp_reward,'badge',b.id::text,
+        'EXP por conquistar a badge: '||b.name,auth.uid()
+      from public.badges b
+      where b.id=p_badge_id and b.exp_reward>0
+      on conflict (member_id,source_type,source_key)
+        where source_type='badge' and source_key is not null do nothing;
+    end if;
+  end if;
+end;
+$$;
