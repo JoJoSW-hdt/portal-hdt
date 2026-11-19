@@ -127,7 +127,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
     <div className="community-heading"><div><span className="eyebrow">MURAL DOS AVENTUREIROS</span><h2>Comunidade</h2><p>Compartilhe suas histórias, imagens e momentos com todos.</p></div></div>
     {profile&&<div className="community-composer panel">
       {composer?<RichEditor supabase={supabase} profile={profile} onSave={html=>savePost(html)} onCancel={()=>setComposer(false)} busy={busy}/>:<button className="composer-trigger" onClick={()=>setComposer(true)}><span className="post-avatar">{profile.avatar_url?<img src={profile.avatar_url}/>:profile.display_name?.slice(0,1)||"H"}</span><span>O que você gostaria de compartilhar?</span><ImageIcon size={19}/></button>}
-    </div>
+    </div>}
     {loading?<div className="empty-state">Carregando publicações...</div>:posts.length?posts.map(post=><article className="community-post panel" key={post.id}>
       <div className="post-header">{authorLine(post.author)}<time>{new Date(post.created_at).toLocaleString("pt-BR")}{post.updated_at!==post.created_at?" · editada":""}</time></div>
       {editing===post.id?<RichEditor initialHtml={post.body_html} profile={profile} supabase={supabase} onSave={html=>savePost(html,post.id)} onCancel={()=>setEditing(null)} busy={busy} submitLabel="Salvar edição"/>:<><button className="post-open-area" onClick={()=>setSelected(post.id)}><div className="post-rich-content" dangerouslySetInnerHTML={{__html:cleanHtml(post.body_html)}}/><span className="post-read-more">Abrir publicação e comentários</span></button>{postActions(post)}</>}
@@ -139,7 +139,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
       <div className="post-rich-content post-detail-body" dangerouslySetInnerHTML={{__html:cleanHtml(selectedPost.body_html)}}/>
       {postActions(selectedPost)}
       <div className="post-comments"><h3>Comentários ({selectedPost.comments.length})</h3>
-        {selectedPost.comments.map(c=><div className="post-comment" key={c.id}><div className="post-header">{authorLine(c.author)}<time>{new Date(c.created_at).toLocaleString("pt-BR")}</time></div><p>{c.body}</p>{(c.author_id===profile.id||canModerate)&&<button className="comment-delete" onClick={()=>removeComment(c.id)}><Trash2 size={13}/>Excluir</button>}</div>)}
+        {selectedPost.comments.map(c=><div className="post-comment" key={c.id}><div className="post-header">{authorLine(c.author)}<time>{new Date(c.created_at).toLocaleString("pt-BR")}</time></div><p>{c.body}</p>{((profile&&c.author_id===profile.id)||canModerate)&&<button className="comment-delete" onClick={()=>removeComment(c.id)}><Trash2 size={13}/>Excluir</button>}</div>)}
         {profile?<form className="comment-form" onSubmit={sendComment}><input value={comment} onChange={e=>setComment(e.target.value)} placeholder="Escreva um comentário..." maxLength={2000}/><button className="primary-btn" disabled={busy||!comment.trim()}><Send size={15}/>Enviar</button></form>:<p className="login-to-interact">Entre no portal para comentar e reagir.</p> }
       </div>
     </section></div>}
