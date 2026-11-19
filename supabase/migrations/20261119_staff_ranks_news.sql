@@ -62,10 +62,10 @@ grant execute on function public.admin_update_staff_permissions(jsonb) to authen
 
 -- Permitir que Staff com a permissão correspondente consulte cadastros pendentes.
 create or replace function public.can_manage_members()
-returns boolean language sql stable security definer set search_path=public as $
+returns boolean language sql stable security definer set search_path=public as $$
   select public.has_portal_permission('approve_members')
     or exists(select 1 from public.profiles p where p.id=auth.uid() and p.status='approved' and p.role in ('moderator','organizer'));
-$;
+$$;
 
 -- 2) Aprovação e badges: Staff recebe somente as permissões configuradas.
 create or replace function public.admin_update_member(
