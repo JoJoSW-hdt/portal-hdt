@@ -193,7 +193,7 @@ create function public.admin_save_badge(
 ) returns uuid language plpgsql security definer set search_path=public as $$
 declare result_id uuid;
 begin
-  if not public.has_portal_permission('grant_badges') then
+  if not public.is_portal_admin() then
     raise exception 'Você não tem permissão para gerenciar badges.';
   end if;
   if char_length(trim(p_name)) not between 2 and 50 then raise exception 'Nome da badge inválido.'; end if;
