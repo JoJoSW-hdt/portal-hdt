@@ -18,7 +18,7 @@ function cleanHtml(html) {
           try { const u = new URL(attr.value, window.location.origin); if (!["http:","https:"].includes(u.protocol)) child.removeAttribute(attr.name); else child.setAttribute("rel","noopener noreferrer"); } catch { child.removeAttribute(attr.name); }
         } else if (child.tagName === "IMG" && name === "src") {
           if (!attr.value.startsWith("https://")) child.removeAttribute("src");
-        } else if (child.tagName === "IMG" && ["alt","width"].includes(name)) {
+        } else if (name === "style") { const match=attr.value.match(/text-align\\s*:\\s*(left|center|right|justify)/i); if(match) child.style.textAlign=match[1].toLowerCase(); child.removeAttribute(attr.name); } else if (child.tagName === "IMG" && ["alt","width"].includes(name)) {
           // Keep simple image presentation attributes.
         } else child.removeAttribute(attr.name);
       });
@@ -61,7 +61,7 @@ function RichEditor({initialHtml="",onSave,onCancel,busy=false,submitLabel="Publ
       <button type="button" title="Alinhar à direita" onClick={()=>command("justifyRight")}><AlignRight size={16}/></button>
       <button type="button" title="Inserir link" onClick={()=>{const url=window.prompt("Cole o endereço do link:");if(url)command("createLink",url);}}><span className="editor-link">Link</span></button>
       <button type="button" title="Inserir imagem" disabled={uploading} onClick={()=>file.current?.click()}><ImageIcon size={16}/></button>
-      <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={async e=>{try{await insertImage(e.target.files?.[0],supabase,profile);}catch(err){window.alert(err.message);}finally{e.target.value="";}}}/>
+      <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={async e=>{try{await insertImage(e.target.files?.[0],supabase,profile);}catch(err){window.alert(err.message);}finally{e.target.value="";}}}/>
     </div>
     <div ref={editor} className="editor-content" contentEditable suppressContentEditableWarning data-placeholder="Compartilhe uma novidade, uma lembrança ou uma história com a comunidade..." />
     <div className="editor-footer"><small>{uploading?"Enviando imagem...":"Você pode formatar o texto e inserir imagens entre os parágrafos."}</small><div>{onCancel&&<button type="button" className="outline-btn" onClick={onCancel}>Cancelar</button>}<button className="primary-btn" disabled={busy||uploading}>{busy?"Salvando...":submitLabel}</button></div></div>
