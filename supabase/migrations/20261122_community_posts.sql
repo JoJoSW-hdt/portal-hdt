@@ -216,3 +216,14 @@ drop policy if exists "Authors and moderators delete comments" on public.communi
 create policy "Authors and moderators delete comments"
 on public.community_post_comments for delete to authenticated
 using (author_id=auth.uid() or public.can_moderate_community());
+
+drop policy if exists "Authors and moderators delete post images" on storage.objects;
+create policy "Authors and moderators delete post images"
+on storage.objects for delete to authenticated
+using (
+  bucket_id='portal-assets'
+  and (
+    ((storage.foldername(name))[1]='posts' and (storage.foldername(name))[2]=auth.uid()::text)
+    or public.can_moderate_community()
+  )
+);
