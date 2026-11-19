@@ -48,3 +48,73 @@
 .member-admin-tools{margin-top:24px;padding:18px;border:1px solid #dce4d7;border-radius:12px;background:#f8faf5;display:grid;gap:10px}.member-admin-heading{display:flex;align-items:center;gap:10px;color:#557c49}.member-admin-heading h3{margin:0;color:#344b35;font-size:14px}.member-admin-heading p{margin:4px 0 0;color:#788575;font-size:10px}.member-admin-tools label{display:grid;gap:6px;color:#53664f;font-size:11px;font-weight:800}.member-admin-tools select{width:100%;border:1px solid #d8e1d3;border-radius:8px;padding:10px;background:#fffefa;color:#26382c}.member-admin-tools .subtle-btn{justify-self:start}.member-admin-error{margin:0;color:#a34b42;font-size:11px}
 
 .member-admin-history{margin-top:8px;padding-top:12px;border-top:1px solid #e2e9dd}.member-admin-history>strong{display:block;color:#405a3e;font-size:11px;margin-bottom:8px}.member-admin-history>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid #e9eee5}.member-admin-history span{font-size:10px;color:#53664f}.member-admin-history small,.member-admin-history p{font-size:9px;color:#899584}
+
+
+/* Mural comunitário: editor, publicações, reações e comentários */
+.community-content{max-width:920px}
+.community-heading{margin:4px 0 18px}
+.community-heading h2{font-size:25px;color:#304a35;margin:7px 0}
+.community-heading p{font-size:12px;color:#788575;margin:5px 0}
+.community-composer{margin-top:0}
+.composer-trigger{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;text-align:left;color:#82907d;padding:4px}
+.composer-trigger>span:nth-child(2){flex:1;background:#f0f3ec;border-radius:24px;padding:13px 16px;font-size:12px;color:#73816e}
+.composer-trigger>svg{color:#66865a}
+.post-avatar{width:39px;height:39px;flex:0 0 39px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#e8efe2;color:#557748;font-size:14px;font-weight:800}
+.post-avatar img{width:100%;height:100%;object-fit:cover}
+.community-editor{border:1px solid #dce4d7;border-radius:10px;overflow:hidden;background:#fff}
+.editor-toolbar{display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #e5ebe1;background:#f7f9f4}
+.editor-toolbar button{width:32px;height:31px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5b7155}
+.editor-toolbar button:hover{background:#e7eee2}
+.editor-toolbar button:disabled{opacity:.5}
+.editor-toolbar>span{height:20px;border-left:1px solid #dce4d7;margin:0 4px}
+.editor-link{font-size:10px;font-weight:800}
+.editor-content{min-height:145px;padding:15px;outline:none;color:#40533e;font-size:13px;line-height:1.7;text-align:left}
+.editor-content:empty:before{content:attr(data-placeholder);color:#a0aa99}
+.editor-content img,.post-rich-content img{max-width:100%;height:auto;border-radius:9px;display:block;margin:10px auto}
+.editor-content blockquote,.post-rich-content blockquote{margin:12px 0;padding:8px 14px;border-left:3px solid #c5b77d;background:#f7f7ef;color:#66745e}
+.editor-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid #edf0e9}
+.editor-footer small{font-size:10px;color:#899584}
+.editor-footer>div{display:flex;align-items:center;gap:8px}
+.editor-footer .primary-btn{width:auto;margin:0;padding:9px 14px}
+.editor-footer .outline-btn{padding:8px 12px}
+.community-post{padding:18px;margin-top:14px}
+.post-header{display:flex;align-items:center;gap:10px;min-width:0}
+.post-header>span:nth-child(2){display:grid;gap:3px;min-width:0}
+.post-header strong{font-size:12px;color:#344b35}
+.post-header small{font-size:9px;color:#83907d}
+.post-header time{margin-left:auto;font-size:9px;color:#98a291;white-space:nowrap}
+.post-open-area{width:100%;padding:0;border:0;background:transparent;text-align:left;color:inherit}
+.post-rich-content{padding:13px 0 5px;color:#4e604b;font-size:13px;line-height:1.75;overflow-wrap:anywhere}
+.post-rich-content p{margin:0 0 10px}
+.post-rich-content h2,.post-rich-content h3{color:#304a35;margin:14px 0 8px}
+.post-rich-content ul,.post-rich-content ol{padding-left:24px}
+.post-rich-content a{color:#557c49;text-decoration:underline}
+.post-read-more{font-size:10px;color:#718b62;font-weight:800}
+.post-actions{display:flex;gap:10px;border-top:1px solid #edf0e9;border-bottom:1px solid #edf0e9;padding:8px 0;margin-top:10px}
+.post-actions button,.post-management button,.comment-delete{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#778572;padding:7px 9px;font-size:10px;font-weight:800;border-radius:6px}
+.post-actions button:hover,.post-management button:hover{background:#f0f4ec}
+.post-actions button.reacted{color:#bd5c58}
+.post-management{display:flex;justify-content:flex-end;gap:5px;padding-top:6px}
+.post-management button{font-size:9px}
+.post-detail-modal{width:min(100%,760px);max-height:88vh;overflow:auto;background:#fffefa;border:1px solid #d8dfd1;border-radius:16px;padding:26px;position:relative;box-shadow:0 20px 70px #10201555}
+.post-detail-body{padding:20px 0}
+.post-comments{margin-top:18px}
+.post-comments h3{font-size:14px;color:#344b35;margin:0 0 10px}
+.post-comment{padding:12px 0;border-top:1px solid #edf0e9}
+.post-comment .post-avatar{width:31px;height:31px;flex-basis:31px;font-size:11px}
+.post-comment p{margin:8px 0 0 41px;font-size:11px;line-height:1.6;color:#53664f;white-space:pre-wrap;overflow-wrap:anywhere}
+.comment-delete{margin-left:34px;color:#a45a4d}
+.comment-form{display:flex;gap:8px;margin-top:15px}
+.comment-form input{flex:1;min-width:0;border:1px solid #d8e1d3;border-radius:22px;padding:11px 15px;background:#f9faf6;color:#344b35;font-size:11px}
+.comment-form .primary-btn{width:auto;margin:0;padding:9px 14px;display:flex;align-items:center;gap:6px}
+.login-to-interact{padding:12px;background:#f3f5ef;border-radius:8px;color:#71816d;font-size:11px}
+@media(max-width:620px){
+ .community-content{padding:14px}
+ .community-post{padding:14px}
+ .post-header time{font-size:8px}
+ .editor-footer{align-items:flex-start;flex-direction:column}
+ .editor-footer>div{width:100%;justify-content:flex-end}
+ .post-detail-modal{padding:19px 15px}
+ .comment-form{flex-direction:column}
+ .comment-form .primary-btn{justify-content:center}
+}
