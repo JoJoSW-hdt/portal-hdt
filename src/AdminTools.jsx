@@ -61,12 +61,18 @@ export default function AdminTools({mode,supabase,profile,members,ranks,newsPost
   async function reviewSuggestion(id,approve){const {error}=await supabase.rpc("admin_review_rank_promotion",{p_request_id:id,p_approve:approve});onMessage(error?.message||(approve?"Promoção aprovada!":"Sugestão recusada."));if(!error){loadSuggestions();onRefresh()}}
   async function assignStaff(memberId,role){const {error}=await supabase.rpc("admin_update_member",{p_member_id:memberId,p_status:null,p_role:role});onMessage(error?.message||(role==="staff"?"Cargo Staff atribuído.":"Cargo Staff removido."));if(!error)onRefresh()}
   async function saveNews(bodyHtml){
+    if(news.title.trim().length<3){onMessage("Informe um título com pelo menos 3 caracteres.");return;}
+    if(!bodyHtml.replace(/<[^>]*>/g,"").trim()&&!bodyHtml.includes("<img")){onMessage("Escreva o conteúdo da notícia ou insira uma imagem.");return;}
     setBusy(true);const {error}=await supabase.rpc("admin_save_news",{
       p_news_id:editingNews?.id||null,p_title:news.title,p_summary:news.summary,p_body:bodyHtml,p_cover_image_url:editingNews?.cover_image_url||null,p_status:news.status
     });setBusy(false);if(error){onMessage(error.message);return}
     onMessage(news.status==="published"?"Notícia publicada!":"Rascunho salvo.");setNews({title:"",summary:"",body:"",status:"draft"});setEditingNews(null);onRefresh();
   }
   async function saveEvent(descriptionHtml){
+    if(event.title.trim().length<3){onMessage("Informe o nome do evento.");return;}
+    if(!event.starts_at){onMessage("Informe a data e o horário de início.");return;}
+    if(event.ends_at&&new Date(event.ends_at)<new Date(event.starts_at)){onMessage("O término não pode ser anterior ao início.");return;}
+    if(!descriptionHtml.replace(/<[^>]*>/g,"").trim()&&!descriptionHtml.includes("<img")){onMessage("Adicione a descrição do evento ou uma imagem.");return;}
     setBusy(true);
     const {error}=await supabase.rpc("admin_save_event",{
       p_event_id:editingEvent?.id||null,p_title:event.title,p_summary:event.summary,p_starts_at:new Date(event.starts_at).toISOString(),
