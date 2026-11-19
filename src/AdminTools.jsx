@@ -4,6 +4,7 @@ import { Check, X, Pencil, Trash2, RefreshCw, ShieldCheck, Newspaper, Crown, Awa
 
 const emptyRank={name:"",description:"",color:"#22C55E",sort_order:1,min_days:0,min_exp:0,active:true};
 const defaultPermissions={approve_members:true,grant_badges:true,grant_exp:true,publish_news:true};
+const toLocalDateTime=(value)=>{if(!value)return "";const d=new Date(value);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};
 
 export default function AdminTools({mode,supabase,profile,members,ranks,newsPosts,events=[],badges=[],staffPermissions,onRefresh,onMessage}) {
   const [permissions,setPermissions]=useState(staffPermissions||defaultPermissions);
@@ -119,7 +120,7 @@ export default function AdminTools({mode,supabase,profile,members,ranks,newsPost
         {editingEvent&&<button type="button" className="outline-btn" onClick={()=>{setEditingEvent(null);setEvent(emptyEvent)}}>Cancelar edição</button>}
       </div>
     </div>
-    <div className="panel"><h3>Eventos cadastrados ({events.length})</h3>{events.map(item=><div className="admin-badge-row" key={item.id}><div><strong>{item.title}</strong><span>{item.status==="published"?"Publicado":"Rascunho"} · {new Date(item.starts_at).toLocaleString("pt-BR")}</span><p>{item.summary}</p></div><button className="icon-btn" onClick={()=>{setEditingEvent(item);setEvent({...emptyEvent,...item,starts_at:item.starts_at?new Date(item.starts_at).toISOString().slice(0,16):"",ends_at:item.ends_at?new Date(item.ends_at).toISOString().slice(0,16):""})}}><Pencil/></button><button className="icon-btn danger" onClick={()=>deleteEvent(item.id)}><Trash2/></button></div>)}</div>
+    <div className="panel"><h3>Eventos cadastrados ({events.length})</h3>{events.map(item=><div className="admin-badge-row" key={item.id}><div><strong>{item.title}</strong><span>{item.status==="published"?"Publicado":"Rascunho"} · {new Date(item.starts_at).toLocaleString("pt-BR")}</span><p>{item.summary}</p></div><button className="icon-btn" onClick={()=>{setEditingEvent(item);setEvent({...emptyEvent,...item,starts_at:item.starts_at?toLocalDateTime(item.starts_at):"",ends_at:item.ends_at?toLocalDateTime(item.ends_at):""})}}><Pencil/></button><button className="icon-btn danger" onClick={()=>deleteEvent(item.id)}><Trash2/></button></div>)}</div>
   </section>;
 
   return <section className="content">
