@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ShieldCheck, Users, UserRound, Settings, LogOut, Check, X, Search, Leaf, Swords, Clock3, Crown, AlertCircle, RefreshCw, Award, Plus, Trash2, Image as ImageIcon, CalendarDays, Star, Eye, Pencil, Sparkles } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
 
