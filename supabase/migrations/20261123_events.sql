@@ -32,7 +32,11 @@ grant execute on function public.can_manage_events() to authenticated;
 
 drop policy if exists "Published events are public" on public.events;
 create policy "Published events are public" on public.events
-for select to anon, authenticated using (status='published' or public.can_manage_events());
+for select to anon, authenticated using (status='published');
+
+drop policy if exists "Staff can view all events" on public.events;
+create policy "Staff can view all events" on public.events
+for select to authenticated using (public.can_manage_events());
 
 
 
