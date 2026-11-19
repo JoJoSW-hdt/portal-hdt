@@ -26,6 +26,9 @@ begin
   if not exists(select 1 from public.profiles where id=auth.uid() and status='approved' and role='founder') then
     raise exception 'Somente o Fundador pode alterar cargos administrativos.';
   end if;
+  if p_member_id = auth.uid() then
+    raise exception 'Não é possível alterar o próprio cargo de Fundador.';
+  end if;
   if p_role not in ('staff','admin','moderator','organizer','member') then
     raise exception 'Cargo inválido. O cargo Fundador não pode ser atribuído por esta tela.';
   end if;
@@ -61,5 +64,7 @@ begin
 end;
 $$;
 
+revoke all on function public.founder_update_member_role(uuid,text) from public, anon;
+revoke all on function public.founder_set_member_rank(uuid,uuid) from public, anon;
 grant execute on function public.founder_update_member_role(uuid,text) to authenticated;
 grant execute on function public.founder_set_member_rank(uuid,uuid) to authenticated;
