@@ -9,17 +9,30 @@ function cleanHtml(html) {
       if (child.nodeType === Node.TEXT_NODE) return;
       if (child.nodeType !== Node.ELEMENT_NODE) { child.remove(); return; }
       if (!allowedTags.has(child.tagName)) {
+        clean(child);
         child.replaceWith(...child.childNodes);
         return;
       }
       [...child.attributes].forEach((attr) => {
         const name = attr.name.toLowerCase();
         if (child.tagName === "A" && name === "href") {
-          try { const u = new URL(attr.value, window.location.origin); if (!["http:","https:"].includes(u.protocol)) child.removeAttribute(attr.name); else child.setAttribute("rel","noopener noreferrer"); } catch { child.removeAttribute(attr.name); }
+          try {
+            const url = new URL(attr.value, window.location.origin);
+            if (!["http:", "https:"].includes(url.protocol)) child.removeAttribute(attr.name);
+            else child.setAttribute("rel", "noopener noreferrer");
+          } catch { child.removeAttribute(attr.name); }
         } else if (child.tagName === "IMG" && name === "src") {
-          if (!attr.value.startsWith("https://")) child.removeAttribute("src");
-        } else if (name === "style") { const match=attr.value.match(/text-align\\s*:\\s*(left|center|right|justify)/i); if(match) child.setAttribute("style",`text-align:${match[1].toLowerCase()}`); else child.removeAttribute(attr.name); } else if (child.tagName === "IMG" && ["alt","width"].includes(name)) {
-          // Keep simple image presentation attributes.
+          try {
+            if (new URL(attr.value, window.location.origin).protocol !== "https:") child.removeAttribute(attr.name);
+          } catch { child.removeAttribute(attr.name); }
+        } else if (name === "style") {
+          const match = attr.value.match(/text-align\\s*:\\s*(left|center|right|justify)/i);
+          if (match) child.setAttribute("style", `text-align:${match[1].toLowerCase()}`);
+          else child.removeAttribute(attr.name);
+        } else if (child.tagName === "IMG" && name === "alt") {
+          // Keep accessible image descriptions.
+        } else if (child.tagName === "IMG" && name === "width" && /^\\d{1,3}%?$/.test(attr.value)) {
+          // Keep bounded numeric or percentage widths.
         } else child.removeAttribute(attr.name);
       });
       clean(child);
@@ -36,7 +49,7 @@ function RichEditor({initialHtml="",onSave,onCancel,busy=false,submitLabel="Publ
   useEffect(()=>{ if(editor.current) editor.current.innerHTML=initialHtml; },[initialHtml]);
   function command(name,value=null){ editor.current?.focus(); document.execCommand(name,false,value); }
   async function insertImage(image,supabase,profile){
-    if(!image || !image.type.startsWith("image/")) throw new Error("Escolha um arquivo de imagem.");
+    if(!image || !["image/png","image/jpeg","image/webp"].includes(image.type)) throw new Error("Use uma imagem PNG, JPG ou WebP.");
     if(image.size>5*1024*1024) throw new Error("A imagem deve ter até 5 MB.");
     setUploading(true);
     try {
