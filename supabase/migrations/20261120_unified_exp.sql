@@ -36,6 +36,7 @@ create table if not exists public.member_badge_exp_claims (
   claimed_at timestamptz not null default now(),
   primary key(member_id,badge_id)
 );
+alter table public.member_badge_exp_claims enable row level security;
 revoke all on public.member_badge_exp_claims from anon,authenticated;
 create index if not exists member_exp_member_created_idx
   on public.member_exp_transactions(member_id,created_at desc);
