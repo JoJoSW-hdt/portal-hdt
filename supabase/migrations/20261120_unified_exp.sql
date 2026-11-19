@@ -204,3 +204,21 @@ $$;
 grant execute on function public.admin_save_badge(uuid,text,text,text,text,integer) to authenticated;
 
 -- Saldo público calculado e sem possibilidade de edição pelo cliente.
+
+-- A permissão de EXP também precisa ser aceita pelo editor de permissões da Staff.
+create or replace function public.admin_update_staff_permissions(p_permissions jsonb)
+returns void language plpgsql security definer set search_path=public as $$
+begin
+  if not exists(select 1 from public.profiles where id=auth.uid() and role='founder' and status='approved') then
+    raise exception 'Somente o Fundador pode configurar as permissões da Staff.';
+  end if;
+  if jsonb_typeof(p_permissions) is distinct from 'object' then raise exception 'Permissões inválidas.'; end if;
+  if exists (
+    select 1 from jsonb_each(p_permissions) e
+    where e.key not in ('approve_members','grant_badges','grant_exp','publish_news')
+       or jsonb_typeof(e.value) <> 'boolean'
+  ) then raise exception 'Permissões inválidas para a Staff.'; end if;
+  update public.portal_roles set permissions=p_permissions,updated_at=now() where role_key='staff';
+end;
+$$;
+grant execute on function public.admin_update_staff_permissions(jsonb) to authenticated;
