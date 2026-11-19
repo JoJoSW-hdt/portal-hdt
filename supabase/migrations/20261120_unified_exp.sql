@@ -151,7 +151,7 @@ begin
   if not exists(select 1 from public.profiles where id=auth.uid() and role='founder' and status='approved') then
     raise exception 'Somente o Fundador pode corrigir o saldo de EXP.';
   end if;
-  if p_amount is null or p_amount=0 or abs(p_amount)>100000 then raise exception 'Valor de ajuste inválido.'; end if;
+  if p_amount is null or p_amount=0 or p_amount < -100000 or p_amount > 100000 then raise exception 'Valor de ajuste inválido.'; end if;
   if char_length(trim(coalesce(p_reason,''))) not between 3 and 180 then raise exception 'Informe o motivo do ajuste.'; end if;
   insert into public.member_exp_transactions(member_id,amount,source_type,reason,created_by)
   select p_member_id,p_amount,'adjustment',trim(p_reason),auth.uid()
