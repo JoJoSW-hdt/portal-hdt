@@ -169,3 +169,5 @@
 .event-reward strong{font-size:11px;color:#68572f}
 @media(max-width:720px){.events-grid{grid-template-columns:1fr}.event-card{grid-template-columns:84px minmax(0,1fr);gap:12px;padding:14px}.event-card-date{min-height:96px}.event-card-date strong{font-size:15px}}
 @media(max-width:520px){.event-fields{grid-template-columns:1fr}.public-main>.community-content{margin:26px 0 34px}.news-article{grid-column:auto}}
+
+.signup-email-hint{margin:0 0 6px;padding:11px 12px;border:1px solid #dce6d6;border-radius:8px;background:#f2f6ee;color:#53664f;font-size:12px;line-height:1.6}
