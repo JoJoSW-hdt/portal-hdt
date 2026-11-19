@@ -43,3 +43,6 @@
 
 .exp-total{display:inline-flex;margin-top:8px;padding:7px 11px;border-radius:7px;background:#edf3e8;color:#466b40;font:800 11px 'DM Mono',monospace;letter-spacing:.3px}
 .member-exp{display:inline-flex;margin:2px 0 8px;padding:4px 7px;border-radius:5px;background:#edf3e8;color:#557c49;font:800 9px 'DM Mono',monospace}
+
+/* Administração contextual no perfil do membro */
+.member-admin-tools{margin-top:24px;padding:18px;border:1px solid #dce4d7;border-radius:12px;background:#f8faf5;display:grid;gap:10px}.member-admin-heading{display:flex;align-items:center;gap:10px;color:#557c49}.member-admin-heading h3{margin:0;color:#344b35;font-size:14px}.member-admin-heading p{margin:4px 0 0;color:#788575;font-size:10px}.member-admin-tools label{display:grid;gap:6px;color:#53664f;font-size:11px;font-weight:800}.member-admin-tools select{width:100%;border:1px solid #d8e1d3;border-radius:8px;padding:10px;background:#fffefa;color:#26382c}.member-admin-tools .subtle-btn{justify-self:start}.member-admin-error{margin:0;color:#a34b42;font-size:11px}
