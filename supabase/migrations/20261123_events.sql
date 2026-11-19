@@ -20,10 +20,6 @@ create table if not exists public.events (
 create index if not exists events_starts_at_idx on public.events(starts_at);
 alter table public.events enable row level security;
 
-drop policy if exists "Published events are public" on public.events;
-create policy "Published events are public" on public.events
-for select to anon, authenticated using (status='published');
-
 create or replace function public.can_manage_events()
 returns boolean language sql stable security definer set search_path=public as $$
   select exists(
@@ -33,6 +29,12 @@ returns boolean language sql stable security definer set search_path=public as $
 $$;
 revoke all on function public.can_manage_events() from public, anon;
 grant execute on function public.can_manage_events() to authenticated;
+
+drop policy if exists "Published events are public" on public.events;
+create policy "Published events are public" on public.events
+for select to anon, authenticated using (status='published' or public.can_manage_events());
+
+
 
 create or replace function public.admin_save_event(
   p_event_id uuid,
