@@ -48,7 +48,7 @@ begin
   if not exists(select 1 from public.profiles where id=auth.uid() and role='founder' and status='approved') then
     raise exception 'Somente o Fundador pode configurar as permissões da Staff.';
   end if;
-  if jsonb_typeof(p_permissions) <> 'object' then raise exception 'Permissões inválidas.'; end if;
+  if jsonb_typeof(p_permissions) is distinct from 'object' then raise exception 'Permissões inválidas.'; end if;
   if exists (
     select 1 from jsonb_each(p_permissions) e
     where e.key not in ('approve_members','grant_badges','publish_news')
@@ -167,7 +167,8 @@ alter table public.community_ranks enable row level security;
 alter table public.member_activity enable row level security;
 alter table public.rank_promotion_requests enable row level security;
 drop policy if exists "Community ranks are public" on public.community_ranks;
-create policy "Community ranks are public" on public.community_ranks for select to anon,authenticated using (active=true);
+create policy "Community ranks are public" on public.community_ranks for select to anon,authenticated
+using (active=true or exists(select 1 from public.profiles p where p.id=auth.uid() and p.status='approved' and p.role='founder'));
 drop policy if exists "Activity is visible to member and managers" on public.member_activity;
 create policy "Activity is visible to member and managers" on public.member_activity
 for select to authenticated using (member_id=auth.uid() or public.can_manage_members());
@@ -293,7 +294,8 @@ create table if not exists public.news_posts (
 );
 alter table public.news_posts enable row level security;
 drop policy if exists "Published news are public" on public.news_posts;
-create policy "Published news are public" on public.news_posts for select to anon,authenticated using (status='published');
+create policy "Published news are public" on public.news_posts for select to anon,authenticated
+using (status='published' or public.has_portal_permission('publish_news'));
 revoke insert,update,delete on public.news_posts from anon,authenticated;
 grant select on public.news_posts to anon,authenticated;
 
