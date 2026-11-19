@@ -29,7 +29,7 @@ function cleanHtml(html) {
   return doc.body.innerHTML.trim();
 }
 
-function RichEditor({initialHtml="",onSave,onCancel,busy=false,submitLabel="Publicar"}) {
+function RichEditor({initialHtml="",onSave,onCancel,busy=false,submitLabel="Publicar",supabase,profile}) {
   const editor = useRef(null);
   const file = useRef(null);
   const [uploading,setUploading] = useState(false);
@@ -61,7 +61,7 @@ function RichEditor({initialHtml="",onSave,onCancel,busy=false,submitLabel="Publ
       <button type="button" title="Alinhar à direita" onClick={()=>command("justifyRight")}><AlignRight size={16}/></button>
       <button type="button" title="Inserir link" onClick={()=>{const url=window.prompt("Cole o endereço do link:");if(url)command("createLink",url);}}><span className="editor-link">Link</span></button>
       <button type="button" title="Inserir imagem" disabled={uploading} onClick={()=>file.current?.click()}><ImageIcon size={16}/></button>
-      <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={async e=>{try{await insertImage(e.target.files?.[0],window.__hdtSupabase,window.__hdtProfile);}catch(err){window.alert(err.message);}finally{e.target.value="";}}}/>
+      <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={async e=>{try{await insertImage(e.target.files?.[0],supabase,profile);}catch(err){window.alert(err.message);}finally{e.target.value="";}}}/>
     </div>
     <div ref={editor} className="editor-content" contentEditable suppressContentEditableWarning data-placeholder="Compartilhe uma novidade, uma lembrança ou uma história com a comunidade..." />
     <div className="editor-footer"><small>{uploading?"Enviando imagem...":"Você pode formatar o texto e inserir imagens entre os parágrafos."}</small><div>{onCancel&&<button type="button" className="outline-btn" onClick={onCancel}>Cancelar</button>}<button className="primary-btn" disabled={busy||uploading}>{busy?"Salvando...":submitLabel}</button></div></div>
@@ -76,7 +76,6 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   const [busy,setBusy]=useState(false);
   const [editing,setEditing]=useState(null);
   const [composer,setComposer]=useState(false);
-  useEffect(()=>{window.__hdtSupabase=supabase;window.__hdtProfile=profile;return()=>{delete window.__hdtSupabase;delete window.__hdtProfile};},[supabase,profile]);
   async function refresh(){
     setLoading(true);
     const [p,r,c,m]=await Promise.all([
@@ -106,6 +105,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
     setComposer(false);setEditing(null);onMessage(id?"Publicação atualizada.":"Publicação compartilhada com a comunidade.");await refresh();
   }
   async function toggleHeart(post){
+    if(!profile){onMessage("Entre no portal para reagir às publicações.");return;}
     const mine=post.reactions.find(r=>r.member_id===profile.id);
     const {error}=mine
       ? await supabase.from("community_post_reactions").delete().eq("id",mine.id)
@@ -113,19 +113,19 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
     if(error){onMessage(error.message);return;} await refresh();
   }
   async function sendComment(e){
-    e.preventDefault();if(!selectedPost||!comment.trim())return;
+    e.preventDefault();if(!profile){onMessage("Entre no portal para comentar.");return;}if(!selectedPost||!comment.trim())return;
     setBusy(true);
     const {error}=await supabase.from("community_post_comments").insert({post_id:selectedPost.id,author_id:profile.id,body:comment.trim()});
     setBusy(false);if(error){onMessage(error.message);return;}setComment("");await refresh();
   }
   async function removeComment(id){if(!window.confirm("Excluir este comentário?"))return;const {error}=await supabase.from("community_post_comments").delete().eq("id",id);if(error)onMessage(error.message);else await refresh();}
   async function removePost(id){if(!window.confirm("Excluir esta publicação e seus comentários?"))return;const {error}=await supabase.from("community_posts").delete().eq("id",id);if(error){onMessage(error.message);return;}setSelected(null);await refresh();onMessage("Publicação excluída.");}
-  const canManage=(post)=>post?.author_id===profile.id||canModerate;
+  const canManage=(post)=>!!profile&&(post?.author_id===profile.id||canModerate);
   function authorLine(person){return <><span className="post-avatar">{person?.avatar_url?<img src={person.avatar_url}/>:person?.display_name?.slice(0,1)||"H"}</span><span><strong>{person?.display_name||"Aventureiro"}</strong><small>{person?.role==="founder"?"Fundador":person?.role==="staff"?"Staff":`@${person?.username||"membro"}`}</small></span></>;}
-  function postActions(post){const mine=post.reactions.some(r=>r.member_id===profile.id);return <div className="post-actions"><button className={mine?"reacted":""} onClick={()=>toggleHeart(post)}><Heart size={17} fill={mine?"currentColor":"none"}/>{post.reactions.length||0} coração{post.reactions.length===1?"":"s"}</button><button onClick={()=>setSelected(post.id)}><MessageCircle size={17}/>{post.comments.length||0} comentário{post.comments.length===1?"":"s"}</button></div>;}
+  function postActions(post){const mine=!!profile&&post.reactions.some(r=>r.member_id===profile.id);return <div className="post-actions"><button className={mine?"reacted":""} onClick={()=>toggleHeart(post)}><Heart size={17} fill={mine?"currentColor":"none"}/>{post.reactions.length||0} coração{post.reactions.length===1?"":"s"}</button><button onClick={()=>setSelected(post.id)}><MessageCircle size={17}/>{post.comments.length||0} comentário{post.comments.length===1?"":"s"}</button></div>;}
   return <section className="content community-content">
     <div className="community-heading"><div><span className="eyebrow">MURAL DOS AVENTUREIROS</span><h2>Comunidade</h2><p>Compartilhe suas histórias, imagens e momentos com todos.</p></div></div>
-    <div className="community-composer panel">
+    {profile&&<div className="community-composer panel">
       {composer?<RichEditor supabase={supabase} profile={profile} onSave={html=>savePost(html)} onCancel={()=>setComposer(false)} busy={busy}/>:<button className="composer-trigger" onClick={()=>setComposer(true)}><span className="post-avatar">{profile.avatar_url?<img src={profile.avatar_url}/>:profile.display_name?.slice(0,1)||"H"}</span><span>O que você gostaria de compartilhar?</span><ImageIcon size={19}/></button>}
     </div>
     {loading?<div className="empty-state">Carregando publicações...</div>:posts.length?posts.map(post=><article className="community-post panel" key={post.id}>
@@ -140,7 +140,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
       {postActions(selectedPost)}
       <div className="post-comments"><h3>Comentários ({selectedPost.comments.length})</h3>
         {selectedPost.comments.map(c=><div className="post-comment" key={c.id}><div className="post-header">{authorLine(c.author)}<time>{new Date(c.created_at).toLocaleString("pt-BR")}</time></div><p>{c.body}</p>{(c.author_id===profile.id||canModerate)&&<button className="comment-delete" onClick={()=>removeComment(c.id)}><Trash2 size={13}/>Excluir</button>}</div>)}
-        <form className="comment-form" onSubmit={sendComment}><input value={comment} onChange={e=>setComment(e.target.value)} placeholder="Escreva um comentário..." maxLength={2000}/><button className="primary-btn" disabled={busy||!comment.trim()}><Send size={15}/>Enviar</button></form>
+        {profile?<form className="comment-form" onSubmit={sendComment}><input value={comment} onChange={e=>setComment(e.target.value)} placeholder="Escreva um comentário..." maxLength={2000}/><button className="primary-btn" disabled={busy||!comment.trim()}><Send size={15}/>Enviar</button></form>:<p className="login-to-interact">Entre no portal para comentar e reagir.</p> }
       </div>
     </section></div>}
   </section>;
