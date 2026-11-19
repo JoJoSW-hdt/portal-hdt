@@ -40,3 +40,6 @@
 .news-card h3{font-size:18px;color:#344b35;margin:10px 0}
 .news-card p{font-size:12px;line-height:1.7;color:#71816d;white-space:pre-wrap}
 @media(max-width:620px){.rank-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.news-grid{grid-template-columns:1fr}}
+
+.exp-total{display:inline-flex;margin-top:8px;padding:7px 11px;border-radius:7px;background:#edf3e8;color:#466b40;font:800 11px 'DM Mono',monospace;letter-spacing:.3px}
+.member-exp{display:inline-flex;margin:2px 0 8px;padding:4px 7px;border-radius:5px;background:#edf3e8;color:#557c49;font:800 9px 'DM Mono',monospace}
