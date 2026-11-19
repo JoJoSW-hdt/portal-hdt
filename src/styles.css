@@ -169,3 +169,5 @@
 .event-reward strong{font-size:11px;color:#68572f}
 @media(max-width:720px){.events-grid{grid-template-columns:1fr}.event-card{grid-template-columns:84px minmax(0,1fr);gap:12px;padding:14px}.event-card-date{min-height:96px}.event-card-date strong{font-size:15px}}
 @media(max-width:520px){.event-fields{grid-template-columns:1fr}.public-main>.community-content{margin:26px 0 34px}.news-article{grid-column:auto}}
+
+.member-revoke-access{margin-top:10px;padding-top:14px;border-top:1px solid #e2e9dd;display:grid;gap:8px}.member-revoke-access strong{font-size:11px;color:#405a3e}.member-revoke-access p{margin:0;font-size:10px;line-height:1.6;color:#788575}.member-revoke-access .reject-btn{justify-self:start;display:inline-flex;align-items:center;gap:7px}
