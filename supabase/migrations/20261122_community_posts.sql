@@ -138,3 +138,81 @@ using (
     or public.has_portal_permission('publish_news')
   )
 );
+
+-- Founder e Staff (com permissão) são os únicos responsáveis por notícias,
+-- eventos e moderação do mural. O cargo legado "admin" não recebe esse acesso.
+create or replace function public.can_moderate_community()
+returns boolean language sql stable security definer set search_path=public as $$
+  select exists(
+    select 1 from public.profiles p
+    where p.id=auth.uid() and p.status='approved'
+      and (
+        p.role='founder'
+        or (p.role='staff' and coalesce(
+          (select (r.permissions->>'publish_news')::boolean
+           from public.portal_roles r where r.role_key='staff'), false
+        ))
+      )
+  );
+$$;
+grant execute on function public.can_moderate_community() to authenticated;
+
+-- Substitui a autorização ampla de publicação: somente Founder e Staff autorizado.
+create or replace function public.admin_save_news(
+  p_news_id uuid,p_title text,p_summary text,p_body text,p_cover_image_url text,p_status text
+) returns uuid language plpgsql security definer set search_path=public as $$
+declare v_id uuid;
+begin
+  if not public.can_moderate_community() then raise exception 'Somente Founder e Staff autorizado podem publicar notícias.'; end if;
+  if char_length(trim(p_title)) not between 3 and 100 then raise exception 'Título inválido.'; end if;
+  if p_status not in ('draft','published') then raise exception 'Status inválido.'; end if;
+  if p_news_id is null then
+    insert into public.news_posts(title,summary,body,cover_image_url,status,author_id,published_at)
+    values(trim(p_title),coalesce(p_summary,''),coalesce(p_body,''),p_cover_image_url,p_status,auth.uid(),case when p_status='published' then now() end)
+    returning id into v_id;
+  else
+    update public.news_posts set title=trim(p_title),summary=coalesce(p_summary,''),body=coalesce(p_body,''),
+      cover_image_url=p_cover_image_url,status=p_status,updated_at=now(),
+      published_at=case when p_status='published' then coalesce(published_at,now()) else null end
+    where id=p_news_id returning id into v_id;
+    if v_id is null then raise exception 'Notícia não encontrada.'; end if;
+  end if;
+  return v_id;
+end;
+$$;
+
+create or replace function public.admin_delete_news(p_news_id uuid)
+returns void language plpgsql security definer set search_path=public as $$
+begin
+  if not public.can_moderate_community() then raise exception 'Somente Founder e Staff autorizado podem excluir notícias.'; end if;
+  delete from public.news_posts where id=p_news_id;
+end;
+$$;
+grant execute on function public.admin_save_news(uuid,text,text,text,text,text) to authenticated;
+grant execute on function public.admin_delete_news(uuid) to authenticated;
+
+-- Atualiza políticas de moderação para a mesma regra restrita.
+drop policy if exists "Authors and moderators update community posts" on public.community_posts;
+create policy "Authors and moderators update community posts"
+on public.community_posts for update to authenticated
+using (author_id=auth.uid() or public.can_moderate_community())
+with check (
+  (author_id=auth.uid() and exists(select 1 from public.profiles p where p.id=auth.uid() and p.status='approved'))
+  or public.can_moderate_community()
+);
+drop policy if exists "Authors and moderators delete community posts" on public.community_posts;
+create policy "Authors and moderators delete community posts"
+on public.community_posts for delete to authenticated
+using (author_id=auth.uid() or public.can_moderate_community());
+drop policy if exists "Authors and moderators update comments" on public.community_post_comments;
+create policy "Authors and moderators update comments"
+on public.community_post_comments for update to authenticated
+using (author_id=auth.uid() or public.can_moderate_community())
+with check (
+  (author_id=auth.uid() and exists(select 1 from public.profiles p where p.id=auth.uid() and p.status='approved'))
+  or public.can_moderate_community()
+);
+drop policy if exists "Authors and moderators delete comments" on public.community_post_comments;
+create policy "Authors and moderators delete comments"
+on public.community_post_comments for delete to authenticated
+using (author_id=auth.uid() or public.can_moderate_community());
