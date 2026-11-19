@@ -21,3 +21,22 @@
 .empty-public-icon{width:48px;height:48px;border-radius:50%;background:#edf3e8;color:#557c49;display:grid;place-items:center}
 .empty-public strong{font-size:14px;color:#3c563e}
 .empty-public span{font-size:11px;line-height:1.6;max-width:440px}
+
+
+/* Cargos administrativos e patentes da comunidade */
+.member-title-tags{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0 8px}
+.member-role-tag,.member-rank-tag{display:inline-flex;align-items:center;border:1px solid #d8e1d3;border-radius:20px;padding:4px 8px;font:800 9px 'DM Mono',monospace;letter-spacing:.35px;background:#fffefa}
+.member-role-tag{color:#946c1f;border-color:#e8d59c;background:#fbf5e5}
+.member-rank-tag{border-width:1px;background:#fffefa}
+.permission-option{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #edf0e9;font-size:12px;color:#52644f;font-weight:700}
+.permission-option input{accent-color:#557c49;width:16px;height:16px}
+.rank-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.rank-fields label{display:grid;gap:7px;font-size:11px;font-weight:800;color:#53664f}
+.rank-fields input{width:100%;min-width:0;border:1px solid #d8e1d3;border-radius:8px;padding:10px;background:#fbfcf9;color:#26382c}
+.rank-fields input[type=color]{height:40px;padding:4px}
+.rank-color-dot{width:16px;height:16px;border-radius:50%;flex:0 0 16px;border:2px solid #fff;box-shadow:0 0 0 1px #dce4d7}
+.news-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.news-card{background:#fffefa;border:1px solid #dce4d7;border-radius:12px;padding:20px}
+.news-card h3{font-size:18px;color:#344b35;margin:10px 0}
+.news-card p{font-size:12px;line-height:1.7;color:#71816d;white-space:pre-wrap}
+@media(max-width:620px){.rank-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.news-grid{grid-template-columns:1fr}}
