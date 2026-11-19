@@ -11,8 +11,9 @@ export default function AdminTools({mode,supabase,profile,members,ranks,newsPost
   const [expMember,setExpMember]=useState(""),[expAmount,setExpAmount]=useState(100),[expReason,setExpReason]=useState("");
   const [adjustMember,setAdjustMember]=useState(""),[adjustAmount,setAdjustAmount]=useState(-10),[adjustReason,setAdjustReason]=useState("");
   const [suggestions,setSuggestions]=useState([]),[expHistory,setExpHistory]=useState([]);
-  const [news,setNews]=useState({title:"",summary:"",body:"",status:"draft"}),[editingNews,setEditingNews]=useState(null);;
-  const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"draft"};\n  const [event,setEvent]=useState(emptyEvent),[editingEvent,setEditingEvent]=useState(null);
+  const [news,setNews]=useState({title:"",summary:"",body:"",status:"draft"}),[editingNews,setEditingNews]=useState(null);
+  const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"draft"};
+  const [event,setEvent]=useState(emptyEvent),[editingEvent,setEditingEvent]=useState(null);
   const [busy,setBusy]=useState(false);
   useEffect(()=>setPermissions({...defaultPermissions,...(staffPermissions||{})}),[staffPermissions]);
 
