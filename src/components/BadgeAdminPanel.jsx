@@ -1,4 +1,5 @@
 import React from "react";
+import { Pencil, Trash2 } from "lucide-react";
 
 export default function BadgeAdminPanel({ editingBadge, badgeName, badgeDesc, badgeRarity, badgeExp, badgeFile, busy, badges, rarityNames, rarityOrder, onSave, onNameChange, onDescriptionChange, onRarityChange, onExpChange, onFileChange, onCancelEdit, onEdit, onDelete }) {
   return (
@@ -15,7 +16,7 @@ export default function BadgeAdminPanel({ editingBadge, badgeName, badgeDesc, ba
           <div className="form-actions"><button className="primary-btn" disabled={busy}>{busy?"Salvando...":editingBadge?"Salvar alterações":"Criar badge"}</button>{editingBadge&&<button type="button" className="outline-btn" onClick={onCancelEdit}>Cancelar edição</button>}</div>
         </form>
       </div>
-      <div className="panel"><h3>Catálogo ({badges.length})</h3><div className="admin-badge-list">{badges.map(b=><div className="admin-badge-row" key={b.id}><img src={b.image_url}/><div><strong>{b.name}</strong><span>{rarityNames[b.rarity]}</span><p>{b.description}</p></div><button className="icon-btn" onClick={()=>onEdit(b)}><span aria-hidden="true">✎</span></button><button className="icon-btn danger" onClick={()=>onDelete(b.id)}><span aria-hidden="true">×</span></button></div>)}</div></div>
+      <div className="panel"><h3>Catálogo ({badges.length})</h3><div className="admin-badge-list">{badges.map(b=><div className="admin-badge-row" key={b.id}><img src={b.image_url}/><div><strong>{b.name}</strong><span>{rarityNames[b.rarity]}</span><p>{b.description}</p></div><button className="icon-btn" onClick={()=>onEdit(b)}><Pencil/></button><button className="icon-btn danger" onClick={()=>onDelete(b.id)}><Trash2/></button></div>)}</div></div>
     </section>
   );
 }
