@@ -23,6 +23,7 @@ import PublicHomeHero from "./components/PublicHomeHero";
 import PublicHomeSections from "./components/PublicHomeSections";
 import AuthModal from "./components/AuthModal";
 import NewsAdminPanel from "./components/NewsAdminPanel";
+import EventAdminPanel from "./components/EventAdminPanel";
 
 
 export default function App(){
@@ -55,7 +56,7 @@ export default function App(){
  {view==="approvals"&&canApprove&&<MemberApprovals pending={pending} onAction={memberAction}/>}
  {view==="badgeadmin"&&isAdmin&&<BadgeAdminPanel editingBadge={editingBadge} badgeName={badgeName} badgeDesc={badgeDesc} badgeRarity={badgeRarity} badgeExp={badgeExp} badgeFile={badgeFile} busy={busy} badges={badges} rarityNames={rarityNames} rarityOrder={rarityOrder} onSave={saveBadge} onNameChange={setBadgeName} onDescriptionChange={setBadgeDesc} onRarityChange={setBadgeRarity} onExpChange={setBadgeExp} onFileChange={setBadgeFile} onCancelEdit={()=>{setEditingBadge(null);setBadgeName("");setBadgeDesc("");setBadgeRarity("comum");setBadgeExp(0);setBadgeFile(null)}} onEdit={b=>{setEditingBadge(b);setBadgeName(b.name);setBadgeDesc(b.description);setBadgeRarity(b.rarity);setBadgeExp(b.exp_reward||0);setBadgeFile(null);window.scrollTo({top:0,behavior:"smooth"})}} onDelete={deleteBadge}/>} {view==="grant"&&canGrant&&<BadgeGrantPanel members={members} badges={badges} awards={awards} rarityNames={rarityNames} grantMember={grantMember} grantBadge={grantBadge} onMemberChange={setGrantMember} onBadgeChange={setGrantBadge} onGrant={grant} onRevoke={revoke}/>} {view==="exp"&&canGrantExp&&<section className="content"><div className="panel"><div className="panel-heading"><div><h3>Conceder EXP</h3><p>Registre contribuições, eventos e ajudas à comunidade. Toda concessão fica no histórico.</p></div><Sparkles/></div><ExpGrantForm supabase={supabase} members={members} onMessage={setMessage} onRefresh={async()=>{await loadPublic();await loadProfile()}}/></div></section>}
  {view==="newsadmin"&&canPublish&&<NewsAdminPanel supabase={supabase} profile={profile} newsPosts={newsPosts} onRefresh={loadPublic} onMessage={setMessage}/>}
- {view==="eventsadmin"&&canManageEvents&&<AdminTools mode="events" supabase={supabase} profile={profile} members={members} ranks={ranks} newsPosts={newsPosts} events={events} badges={badges} staffPermissions={staffPermissions} onRefresh={loadPublic} onMessage={setMessage}/>}
+ {view==="eventsadmin"&&canManageEvents&&<EventAdminPanel supabase={supabase} profile={profile} events={events} badges={badges} onRefresh={loadPublic} onMessage={setMessage}/>}
 
  {view==="ranks"&&isFounder&&<AdminTools mode="founder" supabase={supabase} profile={profile} members={members} ranks={ranks} newsPosts={newsPosts} events={events} badges={badges} staffPermissions={staffPermissions} onRefresh={loadPublic} onMessage={setMessage}/>}
  </main><BadgeModal award={selectedBadge} onClose={()=>setSelectedBadge(null)}/><MemberModal member={selectedMember} awards={awards.filter(a=>a.member_id===selectedMember?.id)} ranks={ranks} isFounder={isFounder} onAdminChange={manageMember} onRevokeAccess={revokeMemberAccess} supabase={supabase} onClose={()=>setSelectedMember(null)} onBadge={setSelectedBadge}/></div>;
