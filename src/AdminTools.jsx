@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import RichTextEditor from "./RichTextEditor";
 import { Check, X, Pencil, Trash2, RefreshCw, ShieldCheck, Newspaper, Crown, Award, Zap } from "lucide-react";
 
 const emptyRank={name:"",description:"",color:"#22C55E",sort_order:1,min_days:0,min_exp:0,active:true};
@@ -12,7 +11,6 @@ export default function AdminTools({mode,supabase,profile,members,ranks,newsPost
   const [expMember,setExpMember]=useState(""),[expAmount,setExpAmount]=useState(100),[expReason,setExpReason]=useState("");
   const [adjustMember,setAdjustMember]=useState(""),[adjustAmount,setAdjustAmount]=useState(-10),[adjustReason,setAdjustReason]=useState("");
   const [suggestions,setSuggestions]=useState([]),[expHistory,setExpHistory]=useState([]);
-  const [news,setNews]=useState({title:"",summary:"",body:"",status:"draft"}),[editingNews,setEditingNews]=useState(null);
   const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"draft"};
   const [event,setEvent]=useState(emptyEvent),[editingEvent,setEditingEvent]=useState(null);
   const [busy,setBusy]=useState(false);
@@ -61,14 +59,6 @@ export default function AdminTools({mode,supabase,profile,members,ranks,newsPost
   async function scanRanks(){setBusy(true);const {data,error}=await supabase.rpc("admin_scan_rank_promotions");setBusy(false);onMessage(error?.message||`Verificação concluída: ${data||0} nova(s) sugestão(ões).`);if(!error)loadSuggestions()}
   async function reviewSuggestion(id,approve){const {error}=await supabase.rpc("admin_review_rank_promotion",{p_request_id:id,p_approve:approve});onMessage(error?.message||(approve?"Promoção aprovada!":"Sugestão recusada."));if(!error){loadSuggestions();onRefresh()}}
   async function assignStaff(memberId,role){const {error}=await supabase.rpc("admin_update_member",{p_member_id:memberId,p_status:null,p_role:role});onMessage(error?.message||(role==="staff"?"Cargo Staff atribuído.":"Cargo Staff removido."));if(!error)onRefresh()}
-  async function saveNews(bodyHtml){
-    if(news.title.trim().length<3){onMessage("Informe um título com pelo menos 3 caracteres.");return;}
-    if(!bodyHtml.replace(/<[^>]*>/g,"").trim()&&!bodyHtml.includes("<img")){onMessage("Escreva o conteúdo da notícia ou insira uma imagem.");return;}
-    setBusy(true);const {error}=await supabase.rpc("admin_save_news",{
-      p_news_id:editingNews?.id||null,p_title:news.title,p_summary:news.summary,p_body:bodyHtml,p_cover_image_url:editingNews?.cover_image_url||null,p_status:news.status
-    });setBusy(false);if(error){onMessage(error.message);return}
-    onMessage(news.status==="published"?"Notícia publicada!":"Rascunho salvo.");setNews({title:"",summary:"",body:"",status:"draft"});setEditingNews(null);onRefresh();
-  }
   async function saveEvent(descriptionHtml){
     if(event.title.trim().length<3){onMessage("Informe o nome do evento.");return;}
     if(!event.starts_at){onMessage("Informe a data e o horário de início.");return;}
@@ -87,20 +77,6 @@ export default function AdminTools({mode,supabase,profile,members,ranks,newsPost
   }
   async function deleteEvent(id){if(!confirm("Excluir este evento?"))return;const {error}=await supabase.rpc("admin_delete_event",{p_event_id:id});onMessage(error?.message||"Evento excluído.");if(!error)onRefresh()}
 
-  async function deleteNews(id){if(!confirm("Excluir esta notícia?"))return;const {error}=await supabase.rpc("admin_delete_news",{p_news_id:id});onMessage(error?.message||"Notícia excluída.");if(!error)onRefresh()}
-
-  if(mode==="news")return <section className="content">
-    <div className="panel"><div className="panel-heading"><div><h3>{editingNews?"Editar notícia":"Nova notícia"}</h3><p>Monte uma notícia completa com formatação, imagens no meio do texto, links e listas.</p></div><Newspaper/></div>
-      <div className="badge-form">
-        <label>Título<input required minLength="3" maxLength="100" value={news.title} onChange={e=>setNews({...news,title:e.target.value})} placeholder="Título da notícia"/></label>
-        <label>Resumo<textarea rows="2" maxLength="240" value={news.summary} onChange={e=>setNews({...news,summary:e.target.value})} placeholder="Uma breve chamada para a notícia"/></label>
-        <label>Publicação<select value={news.status} onChange={e=>setNews({...news,status:e.target.value})}><option value="draft">Salvar como rascunho</option><option value="published">Publicar agora</option></select></label>
-        <RichTextEditor key={editingNews?.id||"new-news"} initialHtml={news.body} supabase={supabase} profile={profile} onSave={saveNews} busy={busy} submitLabel={editingNews?"Salvar alterações":news.status==="published"?"Publicar notícia":"Salvar rascunho"}/>
-        {editingNews&&<button type="button" className="outline-btn" onClick={()=>{setEditingNews(null);setNews({title:"",summary:"",body:"",status:"draft"})}}>Cancelar edição</button>}
-      </div>
-    </div>
-    <div className="panel"><h3>Notícias e rascunhos ({newsPosts.length})</h3>{newsPosts.map(n=><div className="admin-badge-row" key={n.id}><div><strong>{n.title}</strong><span>{n.status==="published"?"Publicada":"Rascunho"} · {new Date(n.updated_at).toLocaleDateString("pt-BR")}</span><p>{n.summary}</p></div><button className="icon-btn" onClick={()=>{setEditingNews(n);setNews({title:n.title,summary:n.summary||"",body:n.body||"",status:n.status})}}><Pencil/></button><button className="icon-btn danger" onClick={()=>deleteNews(n.id)}><Trash2/></button></div>)}</div>
-  </section>;
   if(mode==="events")return <section className="content">
     <div className="panel"><div className="panel-heading"><div><h3>{editingEvent?"Editar evento":"Criar evento"}</h3><p>Organize um encontro completo para a comunidade. Eventos podem ficar como rascunho até a divulgação.</p></div><Newspaper/></div>
       <div className="badge-form event-form">
