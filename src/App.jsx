@@ -7,6 +7,7 @@ import { usePortalSession } from "./hooks/usePortalSession";
 import { usePortalData } from "./hooks/usePortalData";
 import { usePortalActions } from "./hooks/usePortalActions";
 import { usePortalPermissions } from "./hooks/usePortalPermissions";
+import { usePortalFormState } from "./hooks/usePortalFormState";
 import { roleNames, rarityNames, rarityOrder, Brand, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
 import MemberApprovals from "./components/MemberApprovals";
 import DashboardOverview from "./components/DashboardOverview";
@@ -28,7 +29,14 @@ import AdminPortalLayout from "./components/AdminPortalLayout";
 
 
 export default function App(){
- const [profile,setProfile]=useState(null),[view,setView]=useState("home"),[adminMode,setAdminMode]=useState(false),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:true,grant_badges:true,grant_exp:true,publish_news:true}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[search,setSearch]=useState(""),[authMode,setAuthMode]=useState("login"),[showAuth,setShowAuth]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[username,setUsername]=useState(""),[displayName,setDisplayName]=useState(""),[discord,setDiscord]=useState(""),[tagline,setTagline]=useState(""),[avatarFile,setAvatarFile]=useState(null),[selectedBadge,setSelectedBadge]=useState(null),[selectedMember,setSelectedMember]=useState(null),[editingBadge,setEditingBadge]=useState(null),[badgeName,setBadgeName]=useState(""),[badgeDesc,setBadgeDesc]=useState(""),[badgeRarity,setBadgeRarity]=useState("comum"),[badgeExp,setBadgeExp]=useState(0),[badgeFile,setBadgeFile]=useState(null),[grantMember,setGrantMember]=useState(""),[grantBadge,setGrantBadge]=useState("");
+ const [profile,setProfile]=useState(null),[view,setView]=useState("home"),[adminMode,setAdminMode]=useState(false),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:true,grant_badges:true,grant_exp:true,publish_news:true}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[search,setSearch]=useState(""),[showAuth,setShowAuth]=useState(false),[selectedBadge,setSelectedBadge]=useState(null),[selectedMember,setSelectedMember]=useState(null);
+ const {
+  authMode,setAuthMode,email,setEmail,password,setPassword,username,setUsername,
+  displayName,setDisplayName,discord,setDiscord,tagline,setTagline,avatarFile,setAvatarFile,
+  editingBadge,setEditingBadge,badgeName,setBadgeName,badgeDesc,setBadgeDesc,
+  badgeRarity,setBadgeRarity,badgeExp,setBadgeExp,badgeFile,setBadgeFile,
+  grantMember,setGrantMember,grantBadge,setGrantBadge,
+ } = usePortalFormState();
  const [session,setSession]=usePortalSession(supabase,{setAdminMode,setView});
 
  const { loadPublic, loadProfile } = usePortalData({
