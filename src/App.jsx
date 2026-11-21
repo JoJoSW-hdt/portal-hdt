@@ -44,6 +44,7 @@ export default function App(){
   email, password, username, displayName, avatarFile, discord, tagline,
   editingBadge, badgeFile, badgeName, badgeDesc, badgeRarity, badgeExp,
   grantMember, grantBadge, setBusy, setMessage, setAvatarFile,
+  setEditingBadge, setBadgeName, setBadgeDesc, setBadgeRarity, setBadgeExp, setBadgeFile,
   setSelectedMember, loadProfile, loadPublic,
  });
  if(!hasSupabaseConfig)return <ConfigNotice/>;if(loading)return <div className="loading-screen"><div className="spinner"/>Preparando sua jornada...</div>;
