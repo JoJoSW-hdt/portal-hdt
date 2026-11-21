@@ -6,6 +6,7 @@ import CommunityPosts from "./CommunityPosts";
 import { usePortalSession } from "./hooks/usePortalSession";
 import { usePortalData } from "./hooks/usePortalData";
 import { usePortalActions } from "./hooks/usePortalActions";
+import { usePortalPermissions } from "./hooks/usePortalPermissions";
 import { roleNames, rarityNames, rarityOrder, Brand, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
 import MemberApprovals from "./components/MemberApprovals";
 import DashboardOverview from "./components/DashboardOverview";
@@ -35,7 +36,7 @@ export default function App(){
   setMembers, setBadges, setAwards, setRanks, setNewsPosts, setEvents,
   setStaffPermissions, setProfile, setLoading, setMessage,
  });
- const isAdmin=["founder","admin"].includes(profile?.role)&&profile?.status==="approved";const isFounder=profile?.role==="founder"&&profile?.status==="approved";const isStaff=profile?.role==="staff"&&profile?.status==="approved";const canManageEvents=isFounder||isStaff;const canApprove=isAdmin||(isStaff&&staffPermissions.approve_members);const canGrant=isAdmin||(isStaff&&staffPermissions.grant_badges);const canPublish=isFounder||(isStaff&&staffPermissions.publish_news);const canGrantExp=isAdmin||(isStaff&&staffPermissions.grant_exp);const canEnterAdmin=isAdmin||canApprove||canGrant||canGrantExp||canPublish||canManageEvents;const pending=members.filter(m=>m.status==="pending");
+ const { isAdmin, isFounder, isStaff, canManageEvents, canApprove, canGrant, canPublish, canGrantExp, canEnterAdmin } = usePortalPermissions(profile, staffPermissions);const pending=members.filter(m=>m.status==="pending");
  const filtered=useMemo(()=>members.filter(m=>`${m.username} ${m.display_name} ${m.discord_handle||""}`.toLowerCase().includes(search.toLowerCase())),[members,search]);
  const {
   submitAuth, updateProfile, memberAction, saveBadge, deleteBadge,
