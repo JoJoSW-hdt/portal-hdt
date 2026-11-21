@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ShieldCheck, Users, UserRound, Settings, LogOut, Check, X, Leaf, Clock3, Crown, AlertCircle, RefreshCw, Award, Plus, Trash2, Image as ImageIcon, CalendarDays, Star, Eye, Pencil, Sparkles } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
-import AdminTools from "./AdminTools";
+import FounderAdminPanel from "./components/FounderAdminPanel";
 import CommunityPosts from "./CommunityPosts";
 import { fetchPublicPortalData } from "./lib/portalData";
 import { fetchAuthenticatedProfile } from "./lib/profileData";
@@ -58,6 +58,6 @@ export default function App(){
  {view==="newsadmin"&&canPublish&&<NewsAdminPanel supabase={supabase} profile={profile} newsPosts={newsPosts} onRefresh={loadPublic} onMessage={setMessage}/>}
  {view==="eventsadmin"&&canManageEvents&&<EventAdminPanel supabase={supabase} profile={profile} events={events} badges={badges} onRefresh={loadPublic} onMessage={setMessage}/>}
 
- {view==="ranks"&&isFounder&&<AdminTools mode="founder" supabase={supabase} profile={profile} members={members} ranks={ranks} newsPosts={newsPosts} events={events} badges={badges} staffPermissions={staffPermissions} onRefresh={loadPublic} onMessage={setMessage}/>}
+ {view==="ranks"&&isFounder&&<FounderAdminPanel supabase={supabase} members={members} ranks={ranks} staffPermissions={staffPermissions} onRefresh={loadPublic} onMessage={setMessage}/>}
  </main><BadgeModal award={selectedBadge} onClose={()=>setSelectedBadge(null)}/><MemberModal member={selectedMember} awards={awards.filter(a=>a.member_id===selectedMember?.id)} ranks={ranks} isFounder={isFounder} onAdminChange={manageMember} onRevokeAccess={revokeMemberAccess} supabase={supabase} onClose={()=>setSelectedMember(null)} onBadge={setSelectedBadge}/></div>;
 }
