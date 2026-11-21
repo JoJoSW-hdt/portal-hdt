@@ -3,9 +3,8 @@ import { Clock3 } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
 import FounderAdminPanel from "./components/FounderAdminPanel";
 import CommunityPosts from "./CommunityPosts";
-import { fetchPublicPortalData } from "./lib/portalData";
-import { fetchAuthenticatedProfile } from "./lib/profileData";
 import { usePortalSession } from "./hooks/usePortalSession";
+import { usePortalData } from "./hooks/usePortalData";
 import { usePortalActions } from "./hooks/usePortalActions";
 import { roleNames, rarityNames, rarityOrder, Brand, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
 import MemberApprovals from "./components/MemberApprovals";
@@ -31,9 +30,11 @@ export default function App(){
  const [profile,setProfile]=useState(null),[view,setView]=useState("home"),[adminMode,setAdminMode]=useState(false),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:true,grant_badges:true,grant_exp:true,publish_news:true}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[search,setSearch]=useState(""),[authMode,setAuthMode]=useState("login"),[showAuth,setShowAuth]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[username,setUsername]=useState(""),[displayName,setDisplayName]=useState(""),[discord,setDiscord]=useState(""),[tagline,setTagline]=useState(""),[avatarFile,setAvatarFile]=useState(null),[selectedBadge,setSelectedBadge]=useState(null),[selectedMember,setSelectedMember]=useState(null),[editingBadge,setEditingBadge]=useState(null),[badgeName,setBadgeName]=useState(""),[badgeDesc,setBadgeDesc]=useState(""),[badgeRarity,setBadgeRarity]=useState("comum"),[badgeExp,setBadgeExp]=useState(0),[badgeFile,setBadgeFile]=useState(null),[grantMember,setGrantMember]=useState(""),[grantBadge,setGrantBadge]=useState("");
  const [session,setSession]=usePortalSession(supabase,{setAdminMode,setView});
 
- useEffect(()=>{if(!hasSupabaseConfig)return;loadPublic();if(session?.user)loadProfile();else{setProfile(null);setLoading(false)}},[session?.user?.id]);
- async function loadPublic(){const data=await fetchPublicPortalData(supabase);setMembers(data.members);setBadges(data.badges);setAwards(data.awards);setRanks(data.ranks);setNewsPosts(data.newsPosts);setEvents(data.events);if(data.errors?.length)setMessage(data.errors.map(item=>`Falha ao carregar ${item.resource}: ${item.message}`).join(" · "))}
- async function loadProfile(){setLoading(true);const result=await fetchAuthenticatedProfile(supabase,session.user.id);if(result.error)setMessage(result.error.message);if(result.staffPermissions)setStaffPermissions(result.staffPermissions);setProfile(result.profile);setLoading(false)}
+ const { loadPublic, loadProfile } = usePortalData({
+  supabase, hasSupabaseConfig, session,
+  setMembers, setBadges, setAwards, setRanks, setNewsPosts, setEvents,
+  setStaffPermissions, setProfile, setLoading, setMessage,
+ });
  const isAdmin=["founder","admin"].includes(profile?.role)&&profile?.status==="approved";const isFounder=profile?.role==="founder"&&profile?.status==="approved";const isStaff=profile?.role==="staff"&&profile?.status==="approved";const canManageEvents=isFounder||isStaff;const canApprove=isAdmin||(isStaff&&staffPermissions.approve_members);const canGrant=isAdmin||(isStaff&&staffPermissions.grant_badges);const canPublish=isFounder||(isStaff&&staffPermissions.publish_news);const canGrantExp=isAdmin||(isStaff&&staffPermissions.grant_exp);const canEnterAdmin=isAdmin||canApprove||canGrant||canGrantExp||canPublish||canManageEvents;const pending=members.filter(m=>m.status==="pending");
  const filtered=useMemo(()=>members.filter(m=>`${m.username} ${m.display_name} ${m.discord_handle||""}`.toLowerCase().includes(search.toLowerCase())),[members,search]);
  const {
