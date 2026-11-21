@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Clock3 } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
 import FounderAdminPanel from "./components/FounderAdminPanel";
