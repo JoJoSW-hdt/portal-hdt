@@ -1,3 +1,4 @@
+import React from "react";
 import { Swords } from "lucide-react";
 
 export default function PublicHomeHero({ onJoin }) {
