@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import RichTextEditor from "../RichTextEditor";
-import { Newspaper, Pencil, Trash2 } from "lucide-react";import { Newspaper, Pencil, Trash2 } from "lucide-react";
+import { Newspaper, Pencil, Trash2 } from "lucide-react";
 
 const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"draft"};
 const toLocalDateTime=(value)=>{if(!value)return "";const d=new Date(value);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};
