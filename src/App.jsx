@@ -5,11 +5,8 @@ import FounderAdminPanel from "./components/FounderAdminPanel";
 import CommunityPosts from "./CommunityPosts";
 import { fetchPublicPortalData } from "./lib/portalData";
 import { fetchAuthenticatedProfile } from "./lib/profileData";
-import { updateAuthenticatedProfile } from "./lib/profileActions";
-import { submitPortalAuth } from "./lib/authActions";
 import { usePortalSession } from "./hooks/usePortalSession";
-import { saveBadgeRecord, deleteBadgeRecord, grantBadgeToMember, revokeMemberBadge } from "./lib/badgeActions";
-import { updateMemberStatus, updateFounderManagedMember, revokeMemberPortalAccess } from "./lib/memberActions";
+import { usePortalActions } from "./hooks/usePortalActions";
 import { roleNames, rarityNames, rarityOrder, Brand, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
 import MemberApprovals from "./components/MemberApprovals";
 import DashboardOverview from "./components/DashboardOverview";
@@ -39,15 +36,17 @@ export default function App(){
  async function loadProfile(){setLoading(true);const result=await fetchAuthenticatedProfile(supabase,session.user.id);if(result.error)setMessage(result.error.message);if(result.staffPermissions)setStaffPermissions(result.staffPermissions);setProfile(result.profile);setLoading(false)}
  const isAdmin=["founder","admin"].includes(profile?.role)&&profile?.status==="approved";const isFounder=profile?.role==="founder"&&profile?.status==="approved";const isStaff=profile?.role==="staff"&&profile?.status==="approved";const canManageEvents=isFounder||isStaff;const canApprove=isAdmin||(isStaff&&staffPermissions.approve_members);const canGrant=isAdmin||(isStaff&&staffPermissions.grant_badges);const canPublish=isFounder||(isStaff&&staffPermissions.publish_news);const canGrantExp=isAdmin||(isStaff&&staffPermissions.grant_exp);const canEnterAdmin=isAdmin||canApprove||canGrant||canGrantExp||canPublish||canManageEvents;const pending=members.filter(m=>m.status==="pending");
  const filtered=useMemo(()=>members.filter(m=>`${m.username} ${m.display_name} ${m.discord_handle||""}`.toLowerCase().includes(search.toLowerCase())),[members,search]);
- async function submitAuth(e){e.preventDefault();setBusy(true);setMessage("");try{const result=await submitPortalAuth(supabase,{authMode,email,password,username,displayName});if(result.message)setMessage(result.message);if(result.mode!==authMode)setAuthMode(result.mode);if(authMode!=="signup")setShowAuth(false)}catch(e){setMessage(e.message||"Não foi possível concluir.")}finally{setBusy(false)}}
- async function updateProfile(e){e.preventDefault();setBusy(true);try{await updateAuthenticatedProfile(supabase,{profile,avatarFile,discord,tagline});setAvatarFile(null);setMessage("Seu perfil foi atualizado!");await loadProfile();await loadPublic()}catch(e){setMessage(e.message)}finally{setBusy(false)}}
- async function memberAction(id,status,role=null){setBusy(true);try{await updateMemberStatus(supabase,id,status,role);setMessage("Cadastro atualizado.");await loadPublic()}catch(e){setMessage(e.message)}finally{setBusy(false)}}
- async function saveBadge(e){e.preventDefault();setBusy(true);try{await saveBadgeRecord(supabase,{editingBadge,badgeFile,badgeName,badgeDesc,badgeRarity,badgeExp});setEditingBadge(null);setBadgeName("");setBadgeDesc("");setBadgeRarity("comum");setBadgeExp(0);setBadgeFile(null);setMessage("Badge salva no catálogo!");await loadPublic()}catch(e){setMessage(e.message)}finally{setBusy(false)}}
- async function deleteBadge(id){if(!confirm("Excluir esta badge do catálogo? Ela também será retirada dos perfis."))return;try{await deleteBadgeRecord(supabase,id);setMessage("Badge excluída.");await loadPublic()}catch(e){setMessage(e.message)}}
- async function grant(){try{await grantBadgeToMember(supabase,grantMember,grantBadge);setMessage("Badge concedida!");await loadPublic()}catch(e){setMessage(e.message)}}
- async function revoke(id){try{await revokeMemberBadge(supabase,id);setMessage("Badge retirada do perfil.");await loadPublic()}catch(e){setMessage(e.message)}}
- async function manageMember(type,memberId,value){await updateFounderManagedMember(supabase,type,memberId,value);setMessage(type==="role"?"Cargo administrativo atualizado.":"Patente do membro atualizada.");await loadPublic()}
- async function revokeMemberAccess(memberId){await revokeMemberPortalAccess(supabase,memberId);setMessage("Acesso ao portal revogado. O histórico do membro foi preservado.");setSelectedMember(null);await loadPublic()}
+ const {
+  submitAuth, updateProfile, memberAction, saveBadge, deleteBadge,
+  grant, revoke, manageMember, revokeMemberAccess,
+ } = usePortalActions({
+  supabase, profile, authMode, setAuthMode, setShowAuth,
+  email, password, username, displayName, avatarFile, discord, tagline,
+  editingBadge, badgeFile, badgeName, badgeDesc, badgeRarity, badgeExp,
+  grantMember, grantBadge, setBusy, setMessage, setAvatarFile,
+  setEditingBadge, setBadgeName, setBadgeDesc, setBadgeRarity, setBadgeExp, setBadgeFile,
+  setSelectedMember, loadProfile, loadPublic,
+ });
  if(!hasSupabaseConfig)return <ConfigNotice/>;if(loading)return <div className="loading-screen"><div className="spinner"/>Preparando sua jornada...</div>;
  if(session&&!profile)return <div className="loading-screen">Preparando perfil...</div>;
  if(session&&profile.status!=="approved")return <main className="auth-wrap"><section className="auth-card pending-card"><Brand/><div className="pending-icon"><Clock3 size={34}/></div><h1>{profile.status==="suspended"?"Acesso ao portal revogado":"Seu cadastro está em análise"}</h1><p>{profile.status==="suspended"?"O acesso desta conta foi revogado pela administração. Se acredita que isso aconteceu por engano, entre em contato com a equipe.":"A administração precisa aprovar sua entrada antes de liberar o acesso."}</p><button className="outline-btn" onClick={()=>supabase.auth.signOut()}>Sair da conta</button></section></main>;
