@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import RichTextEditor from "../RichTextEditor";
 import { Newspaper, Pencil, Trash2 } from "lucide-react";
 
 const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"draft"};
