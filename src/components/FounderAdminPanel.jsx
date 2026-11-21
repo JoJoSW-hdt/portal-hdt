@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Check, X, Pencil, Trash2, RefreshCw, ShieldCheck, Crown, Zap } from "lucide-react";
+import { Check, X, Pencil, Trash2, RefreshCw, ShieldCheck, Crown } from "lucide-react";
 
 const emptyRank={name:"",description:"",color:"#22C55E",sort_order:1,min_days:0,min_exp:0,active:true};
 const defaultPermissions={approve_members:true,grant_badges:true,grant_exp:true,publish_news:true};
@@ -7,7 +7,6 @@ const defaultPermissions={approve_members:true,grant_badges:true,grant_exp:true,
 export default function FounderAdminPanel({supabase,members,ranks,staffPermissions,onRefresh,onMessage}) {
   const [permissions,setPermissions]=useState({...defaultPermissions,...(staffPermissions||{})});
   const [rank,setRank]=useState(emptyRank),[editingRank,setEditingRank]=useState(null);
-  const [expMember,setExpMember]=useState(""),[expAmount,setExpAmount]=useState(100),[expReason,setExpReason]=useState("");
   const [adjustMember,setAdjustMember]=useState(""),[adjustAmount,setAdjustAmount]=useState(-10),[adjustReason,setAdjustReason]=useState("");
   const [suggestions,setSuggestions]=useState([]),[expHistory,setExpHistory]=useState([]);
   const [busy,setBusy]=useState(false);
@@ -42,12 +41,6 @@ export default function FounderAdminPanel({supabase,members,ranks,staffPermissio
     onMessage("Patente salva.");setRank(emptyRank);setEditingRank(null);onRefresh();
   }
   async function deleteRank(id){if(!confirm("Excluir esta patente?"))return;const {error}=await supabase.rpc("admin_delete_community_rank",{p_rank_id:id});onMessage(error?.message||"Patente excluída.");if(!error)onRefresh()}
-  async function grantExp(e){
-    e.preventDefault();setBusy(true);
-    const {error}=await supabase.rpc("admin_grant_exp",{p_member_id:expMember,p_amount:Number(expAmount),p_reason:expReason});
-    setBusy(false);if(error){onMessage(error.message);return}
-    onMessage("EXP concedida e registrada no histórico.");setExpReason("");await Promise.all([onRefresh(),loadExpHistory()]);
-  }
   async function adjustExp(e){
     e.preventDefault();setBusy(true);
     const {error}=await supabase.rpc("founder_adjust_exp",{p_member_id:adjustMember,p_amount:Number(adjustAmount),p_reason:adjustReason});
@@ -73,11 +66,6 @@ export default function FounderAdminPanel({supabase,members,ranks,staffPermissio
         <div className="form-actions"><button className="primary-btn" disabled={busy}>{editingRank?"Salvar patente":"Criar patente"}</button>{editingRank&&<button type="button" className="outline-btn" onClick={()=>{setEditingRank(null);setRank(emptyRank)}}>Cancelar</button>}</div>
       </form>
       <div className="admin-badge-list">{ranks.map(r=><div className="admin-badge-row" key={r.id}><span className="rank-color-dot" style={{background:r.color}}/><div><strong style={{color:r.color}}>{r.name}</strong><span>#{r.sort_order} · {r.min_days} dias · {r.min_exp} EXP {r.active?"· Ativa":"· Inativa"}</span><p>{r.description}</p></div><button className="icon-btn" onClick={()=>{setEditingRank(r);setRank({...r})}}><Pencil/></button><button className="icon-btn danger" onClick={()=>deleteRank(r.id)}><Trash2/></button></div>)}</div>
-    </div>
-
-    <div className="panel"><div className="panel-heading"><div><h3>Conceder EXP</h3><p>Fundador e Staff autorizada podem conceder EXP com motivo registrado.</p></div><Zap/></div>
-      <form className="grant-form" onSubmit={grantExp}><label>Membro<select required value={expMember} onChange={e=>setExpMember(e.target.value)}><option value="">Selecione</option>{members.filter(m=>m.status==="approved").map(m=><option key={m.id} value={m.id}>{m.display_name}</option>)}</select></label><label>Quantidade de EXP<input type="number" min="1" max="100000" required value={expAmount} onChange={e=>setExpAmount(e.target.value)}/></label><label>Motivo<input required minLength="3" maxLength="180" value={expReason} onChange={e=>setExpReason(e.target.value)} placeholder="Ex.: ajudou a organizar o evento"/></label><button className="primary-btn" disabled={busy||!expMember}>Conceder EXP</button></form>
-      <div className="admin-badge-list">{[...members].filter(m=>m.status==="approved").sort((a,b)=>(b.exp_total||0)-(a.exp_total||0)).slice(0,10).map((m,i)=><div className="admin-badge-row" key={m.id}><div><strong>#{i+1} · {m.display_name}</strong><span>{Number(m.exp_total||0).toLocaleString("pt-BR")} EXP</span></div></div>)}</div>
     </div>
 
     <div className="panel"><div className="panel-heading"><div><h3>Promoções sugeridas</h3><p>EXP + tempo mínimo (se configurado). Toda promoção precisa da sua aprovação.</p></div><button className="subtle-btn" onClick={scanRanks} disabled={busy}><RefreshCw size={15}/> Verificar</button></div>
