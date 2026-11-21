@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Clock3 } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
 import FounderAdminPanel from "./components/FounderAdminPanel";
@@ -8,6 +8,7 @@ import { usePortalData } from "./hooks/usePortalData";
 import { usePortalActions } from "./hooks/usePortalActions";
 import { usePortalPermissions } from "./hooks/usePortalPermissions";
 import { usePortalFormState } from "./hooks/usePortalFormState";
+import { usePortalViewState } from "./hooks/usePortalViewState";
 import { roleNames, rarityNames, rarityOrder, Brand, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
 import MemberApprovals from "./components/MemberApprovals";
 import DashboardOverview from "./components/DashboardOverview";
@@ -29,7 +30,7 @@ import AdminPortalLayout from "./components/AdminPortalLayout";
 
 
 export default function App(){
- const [profile,setProfile]=useState(null),[view,setView]=useState("home"),[adminMode,setAdminMode]=useState(false),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:true,grant_badges:true,grant_exp:true,publish_news:true}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[search,setSearch]=useState(""),[showAuth,setShowAuth]=useState(false),[selectedBadge,setSelectedBadge]=useState(null),[selectedMember,setSelectedMember]=useState(null);
+ const [profile,setProfile]=useState(null),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:true,grant_badges:true,grant_exp:true,publish_news:true}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[showAuth,setShowAuth]=useState(false);
  const {
   authMode,setAuthMode,email,setEmail,password,setPassword,username,setUsername,
   displayName,setDisplayName,discord,setDiscord,tagline,setTagline,avatarFile,setAvatarFile,
@@ -37,6 +38,7 @@ export default function App(){
   badgeRarity,setBadgeRarity,badgeExp,setBadgeExp,badgeFile,setBadgeFile,
   grantMember,setGrantMember,grantBadge,setGrantBadge,
  } = usePortalFormState();
+ const { view, setView, adminMode, setAdminMode, search, setSearch, selectedBadge, setSelectedBadge, selectedMember, setSelectedMember, pending, filtered } = usePortalViewState(members);
  const [session,setSession]=usePortalSession(supabase,{setAdminMode,setView});
 
  const { loadPublic, loadProfile } = usePortalData({
@@ -44,8 +46,7 @@ export default function App(){
   setMembers, setBadges, setAwards, setRanks, setNewsPosts, setEvents,
   setStaffPermissions, setProfile, setLoading, setMessage,
  });
- const { isAdmin, isFounder, isStaff, canManageEvents, canApprove, canGrant, canPublish, canGrantExp, canEnterAdmin } = usePortalPermissions(profile, staffPermissions);const pending=members.filter(m=>m.status==="pending");
- const filtered=useMemo(()=>members.filter(m=>`${m.username} ${m.display_name} ${m.discord_handle||""}`.toLowerCase().includes(search.toLowerCase())),[members,search]);
+ const { isAdmin, isFounder, isStaff, canManageEvents, canApprove, canGrant, canPublish, canGrantExp, canEnterAdmin } = usePortalPermissions(profile, staffPermissions);
  const {
   submitAuth, updateProfile, memberAction, saveBadge, deleteBadge,
   grant, revoke, manageMember, revokeMemberAccess,
