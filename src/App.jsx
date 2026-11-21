@@ -64,5 +64,5 @@ export default function App(){
  {view==="eventsadmin"&&canManageEvents&&<EventAdminPanel supabase={supabase} profile={profile} events={events} badges={badges} onRefresh={loadPublic} onMessage={setMessage}/>}
 
  {view==="ranks"&&isFounder&&<FounderAdminPanel supabase={supabase} members={members} ranks={ranks} staffPermissions={staffPermissions} onRefresh={loadPublic} onMessage={setMessage}/>}
- </main><BadgeModal award={selectedBadge} onClose={()=>setSelectedBadge(null)}/><MemberModal member={selectedMember} awards={awards.filter(a=>a.member_id===selectedMember?.id)} ranks={ranks} isFounder={isFounder} onAdminChange={manageMember} onRevokeAccess={revokeMemberAccess} supabase={supabase} canGrantExp={canGrantExp} onExpGranted={async()=>{await loadPublic();await loadProfile()}} canGrantExp={false} onClose={()=>setSelectedMember(null)} onBadge={setSelectedBadge}/></div>;
+ </main><BadgeModal award={selectedBadge} onClose={()=>setSelectedBadge(null)}/><MemberModal member={selectedMember} awards={awards.filter(a=>a.member_id===selectedMember?.id)} ranks={ranks} isFounder={isFounder} onAdminChange={manageMember} onRevokeAccess={revokeMemberAccess} supabase={supabase} canGrantExp={canGrantExp} onExpGranted={async()=>{await loadPublic();await loadProfile()}} onClose={()=>setSelectedMember(null)} onBadge={setSelectedBadge}/></div>;
 }
