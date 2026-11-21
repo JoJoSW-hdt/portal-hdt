@@ -1,3 +1,4 @@
+import React from "react";
 import { PublicMember } from "./PortalShared";
 
 export default function PublicMemberDirectory({ members, awards, search, onSearchChange, onBadge, onProfile }) {
