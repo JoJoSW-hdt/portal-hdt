@@ -1,3 +1,4 @@
+import React from "react";
 import { BadgeCatalog } from "./PortalShared";
 
 export default function PublicBadgesPage({ badges }) {
