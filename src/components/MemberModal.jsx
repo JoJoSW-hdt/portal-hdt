@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { Crown, ShieldCheck, X } from "lucide-react";
 import { ProfilePreview } from "./PortalShared";
