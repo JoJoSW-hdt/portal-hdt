@@ -9,7 +9,7 @@ import { submitPortalAuth } from "./lib/authActions";
 import { usePortalSession } from "./hooks/usePortalSession";
 import { saveBadgeRecord, deleteBadgeRecord, grantBadgeToMember, revokeMemberBadge } from "./lib/badgeActions";
 import { updateMemberStatus, updateFounderManagedMember, revokeMemberPortalAccess } from "./lib/memberActions";
-import { rarityNames, rarityOrder, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
+import { roleNames, rarityNames, rarityOrder, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
 import MemberModal from "./components/MemberModal";
 import MemberApprovals from "./components/MemberApprovals";
 import DashboardOverview from "./components/DashboardOverview";
