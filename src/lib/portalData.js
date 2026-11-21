@@ -17,6 +17,18 @@ export async function fetchPublicPortalData(supabase) {
     (expResult.data || []).map((item) => [item.member_id, Number(item.exp_total || 0)])
   );
 
+  const errors = [
+    ["membros", profilesResult.error],
+    ["badges", badgesResult.error],
+    ["conquistas", awardsResult.error],
+    ["patentes", ranksResult.error],
+    ["notícias", newsResult.error],
+    ["eventos", eventsResult.error],
+    ["saldo de EXP", expResult.error],
+  ]
+    .filter(([, error]) => error)
+    .map(([resource, error]) => ({ resource, message: error.message }));
+
   return {
     members: (profilesResult.data || []).map((member) => ({
       ...member,
@@ -27,5 +39,6 @@ export async function fetchPublicPortalData(supabase) {
     ranks: ranksResult.data || [],
     newsPosts: newsResult.data || [],
     events: eventsResult.data || [],
+    errors,
   };
 }
