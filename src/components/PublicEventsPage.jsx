@@ -1,3 +1,4 @@
+import React from "react";
 import { CalendarDays } from "lucide-react";
 import { EventCard } from "./PortalShared";
 
