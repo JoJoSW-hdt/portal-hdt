@@ -11,6 +11,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   const [busy,setBusy]=useState(false);
   const [editing,setEditing]=useState(null);
   const [composer,setComposer]=useState(false);
+  const canInteract=profile?.status==="approved";
   async function refresh(){
     setLoading(true);
     const [p,r,c,m]=await Promise.all([
@@ -29,6 +30,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   useEffect(()=>{refresh();},[supabase]);
   const selectedPost=selected?posts.find(p=>p.id===selected):null;
   async function savePost(html,id=null){
+    if(!canInteract){onMessage("Apenas membros aprovados podem publicar no mural.");return;}
     if(!html.replace(/<[^>]*>/g,"").trim() && !html.includes("<img")){onMessage("Escreva algo antes de publicar.");return;}
     setBusy(true);
     const query=id
@@ -40,7 +42,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
     setComposer(false);setEditing(null);onMessage(id?"Publicação atualizada.":"Publicação compartilhada com a comunidade.");await refresh();
   }
   async function toggleHeart(post){
-    if(!profile){onMessage("Entre no portal para reagir às publicações.");return;}
+    if(!canInteract){onMessage("Apenas membros aprovados podem reagir às publicações.");return;}
     const mine=post.reactions.find(r=>r.member_id===profile.id);
     const {error}=mine
       ? await supabase.from("community_post_reactions").delete().eq("id",mine.id)
@@ -48,19 +50,19 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
     if(error){onMessage(error.message);return;} await refresh();
   }
   async function sendComment(e){
-    e.preventDefault();if(!profile){onMessage("Entre no portal para comentar.");return;}if(!selectedPost||!comment.trim())return;
+    e.preventDefault();if(!canInteract){onMessage("Apenas membros aprovados podem comentar.");return;}if(!selectedPost||!comment.trim())return;
     setBusy(true);
     const {error}=await supabase.from("community_post_comments").insert({post_id:selectedPost.id,author_id:profile.id,body:comment.trim()});
     setBusy(false);if(error){onMessage(error.message);return;}setComment("");await refresh();
   }
   async function removeComment(id){if(!window.confirm("Excluir este comentário?"))return;const {error}=await supabase.from("community_post_comments").delete().eq("id",id);if(error)onMessage(error.message);else await refresh();}
   async function removePost(id){if(!window.confirm("Excluir esta publicação e seus comentários?"))return;const {error}=await supabase.from("community_posts").delete().eq("id",id);if(error){onMessage(error.message);return;}setSelected(null);await refresh();onMessage("Publicação excluída.");}
-  const canManage=(post)=>!!profile&&(post?.author_id===profile.id||canModerate);
+  const canManage=(post)=>canInteract&&(post?.author_id===profile.id||canModerate);
   function authorLine(person){return <><span className="post-avatar">{person?.avatar_url?<img src={person.avatar_url}/>:person?.display_name?.slice(0,1)||"H"}</span><span><strong>{person?.display_name||"Aventureiro"}</strong><small>{person?.role==="founder"?"Fundador":person?.role==="staff"?"Staff":`@${person?.username||"membro"}`}</small></span></>;}
-  function postActions(post){const mine=!!profile&&post.reactions.some(r=>r.member_id===profile.id);return <div className="post-actions"><button className={mine?"reacted":""} disabled={!profile} title={!profile?"Entre no portal para reagir":""} onClick={()=>toggleHeart(post)}><Heart size={17} fill={mine?"currentColor":"none"}/>{post.reactions.length||0} coração{post.reactions.length===1?"":"s"}</button><button onClick={()=>setSelected(post.id)}><MessageCircle size={17}/>{post.comments.length||0} comentário{post.comments.length===1?"":"s"}</button></div>;}
+  function postActions(post){const mine=!!profile&&post.reactions.some(r=>r.member_id===profile.id);return <div className="post-actions"><button className={mine?"reacted":""} disabled={!canInteract} title={!canInteract?"Apenas membros aprovados podem reagir":""} onClick={()=>toggleHeart(post)}><Heart size={17} fill={mine?"currentColor":"none"}/>{post.reactions.length||0} coração{post.reactions.length===1?"":"s"}</button><button onClick={()=>setSelected(post.id)}><MessageCircle size={17}/>{post.comments.length||0} comentário{post.comments.length===1?"":"s"}</button></div>;}
   return <section className="content community-content">
     <div className="community-heading"><div><span className="eyebrow">MURAL DOS AVENTUREIROS</span><h2>Comunidade</h2><p>Compartilhe suas histórias, imagens e momentos com todos.</p></div></div>
-    {profile&&<div className="community-composer panel">
+    {canInteract&&<div className="community-composer panel">
       {composer?<RichTextEditor supabase={supabase} profile={profile} onSave={html=>savePost(html)} onCancel={()=>setComposer(false)} busy={busy}/>:<button className="composer-trigger" onClick={()=>setComposer(true)}><span className="post-avatar">{profile.avatar_url?<img src={profile.avatar_url}/>:profile.display_name?.slice(0,1)||"H"}</span><span>O que você gostaria de compartilhar?</span><ImageIcon size={19}/></button>}
     </div>}
     {loading?<div className="empty-state">Carregando publicações...</div>:posts.length?posts.map(post=><article className="community-post panel" key={post.id}>
@@ -74,8 +76,8 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
       <div className="post-rich-content post-detail-body" dangerouslySetInnerHTML={{__html:cleanHtml(selectedPost.body_html)}}/>
       {postActions(selectedPost)}
       <div className="post-comments"><h3>Comentários ({selectedPost.comments.length})</h3>
-        {selectedPost.comments.map(c=><div className="post-comment" key={c.id}><div className="post-header">{authorLine(c.author)}<time>{new Date(c.created_at).toLocaleString("pt-BR")}</time></div><p>{c.body}</p>{((profile&&c.author_id===profile.id)||canModerate)&&<button className="comment-delete" onClick={()=>removeComment(c.id)}><Trash2 size={13}/>Excluir</button>}</div>)}
-        {profile?<form className="comment-form" onSubmit={sendComment}><input value={comment} onChange={e=>setComment(e.target.value)} placeholder="Escreva um comentário..." maxLength={2000}/><button className="primary-btn" disabled={busy||!comment.trim()}><Send size={15}/>Enviar</button></form>:<p className="login-to-interact">Entre no portal para comentar e reagir.</p> }
+        {selectedPost.comments.map(c=><div className="post-comment" key={c.id}><div className="post-header">{authorLine(c.author)}<time>{new Date(c.created_at).toLocaleString("pt-BR")}</time></div><p>{c.body}</p>{((canInteract&&c.author_id===profile.id)||canModerate)&&<button className="comment-delete" onClick={()=>removeComment(c.id)}><Trash2 size={13}/>Excluir</button>}</div>)}
+        {canInteract?<form className="comment-form" onSubmit={sendComment}><input value={comment} onChange={e=>setComment(e.target.value)} placeholder="Escreva um comentário..." maxLength={2000}/><button className="primary-btn" disabled={busy||!comment.trim()}><Send size={15}/>Enviar</button></form>:<p className="login-to-interact">Apenas membros aprovados podem comentar e reagir.</p> }
       </div>
     </section></div>}
   </section>;
