@@ -19,7 +19,7 @@ export default function EventAdminPanel({supabase,profile,events=[],badges=[],on
       p_event_id:editingEvent?.id||null,p_title:event.title,p_summary:event.summary,p_starts_at:new Date(event.starts_at).toISOString(),
       p_ends_at:event.ends_at?new Date(event.ends_at).toISOString():null,p_location:event.location,p_event_type:event.event_type,
       p_description_html:descriptionHtml,p_has_badge_reward:event.has_badge_reward,p_reward_badge_id:event.has_badge_reward?(event.reward_badge_id||null):null,
-      p_reward_description:event.has_badge_reward?event.reward_description:"",p_status:event.status
+      p_reward_description:event.has_badge_reward?event.reward_description:"",p_status:"published"
     });
     setBusy(false);if(error){onMessage(error.message);return}
     onMessage("Evento publicado!");
