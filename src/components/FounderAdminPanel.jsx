@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Check, X, Pencil, Trash2, RefreshCw, ShieldCheck, Crown } from "lucide-react";
+import { fetchRankPromotionSuggestions, fetchMemberExpHistory } from "../lib/founderAdminData";
 
 const emptyRank={name:"",description:"",color:"#22C55E",sort_order:1,min_days:0,min_exp:0,active:true};
 const defaultPermissions={approve_members:true,grant_badges:true,grant_exp:true,publish_news:true};
@@ -14,16 +15,18 @@ export default function FounderAdminPanel({supabase,members,ranks,staffPermissio
   useEffect(()=>setPermissions({...defaultPermissions,...(staffPermissions||{})}),[staffPermissions]);
 
   async function loadSuggestions(){
-    const {data,error}=await supabase.from("rank_promotion_requests")
-      .select("*,profiles!rank_promotion_requests_member_id_fkey(display_name,username,created_at),community_ranks!rank_promotion_requests_suggested_rank_id_fkey(name,color,min_exp)")
-      .eq("status","pending").order("created_at",{ascending:false});
-    if(error)onMessage(error.message); else setSuggestions(data||[]);
+    try {
+      setSuggestions(await fetchRankPromotionSuggestions(supabase));
+    } catch (error) {
+      onMessage(error.message);
+    }
   }
   async function loadExpHistory(){
-    const {data,error}=await supabase.from("member_exp_transactions")
-      .select("*,profiles!member_exp_transactions_member_id_fkey(display_name,username)")
-      .order("created_at",{ascending:false}).limit(40);
-    if(error)onMessage(error.message); else setExpHistory(data||[]);
+    try {
+      setExpHistory(await fetchMemberExpHistory(supabase));
+    } catch (error) {
+      onMessage(error.message);
+    }
   }
   useEffect(()=>{loadSuggestions();loadExpHistory()},[]);
 
