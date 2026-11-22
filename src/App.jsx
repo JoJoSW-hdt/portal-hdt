@@ -44,7 +44,7 @@ export default function App(){
   setSelectedMember, loadProfile, loadPublic,
  });
  if(!hasSupabaseConfig)return <ConfigNotice/>;if(loading)return <div className="loading-screen"><div className="spinner"/>Preparando sua jornada...</div>;
- if(session&&!profile)return <div className="loading-screen">Preparando perfil...</div>;
+ if(session&&!profile)return <div className="loading-screen">{message||"Preparando perfil..."}</div>;
  if(session&&profile.status!=="approved")return <main className="auth-wrap"><section className="auth-card pending-card"><Brand/><div className="pending-icon"><Clock3 size={34}/></div><h1>{profile.status==="suspended"?"Acesso ao portal revogado":"Seu cadastro está em análise"}</h1><p>{profile.status==="suspended"?"O acesso desta conta foi revogado pela administração. Se acredita que isso aconteceu por engano, entre em contato com a equipe.":"A administração precisa aprovar sua entrada antes de liberar o acesso."}</p><button className="outline-btn" onClick={()=>supabase.auth.signOut()}>Sair da conta</button></section></main>;
  if(!adminMode)return <PublicPortalLayout
   profile={profile} session={session} roleNames={roleNames} canEnterAdmin={canEnterAdmin}
