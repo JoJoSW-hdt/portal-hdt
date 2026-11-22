@@ -1,3 +1,4 @@
+import React from "react";
 import FounderAdminPanel from "./FounderAdminPanel";
 import MemberApprovals from "./MemberApprovals";
 import DashboardOverview from "./DashboardOverview";
