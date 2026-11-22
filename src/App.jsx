@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Clock3 } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
-import CommunityPosts from "./CommunityPosts";
 import { usePortalSession } from "./hooks/usePortalSession";
 import { usePortalData } from "./hooks/usePortalData";
 import { usePortalActions } from "./hooks/usePortalActions";
@@ -9,17 +8,10 @@ import { usePortalPermissions } from "./hooks/usePortalPermissions";
 import { usePortalFormState } from "./hooks/usePortalFormState";
 import { usePortalViewState } from "./hooks/usePortalViewState";
 import { roleNames, Brand, ConfigNotice } from "./components/PortalShared";
-import PublicMemberDirectory from "./components/PublicMemberDirectory";
-import PublicNewsPage from "./components/PublicNewsPage";
-import PublicEventsPage from "./components/PublicEventsPage";
-import PublicBadgesPage from "./components/PublicBadgesPage";
-import PublicHomeHero from "./components/PublicHomeHero";
-import PublicHomeSections from "./components/PublicHomeSections";
 import PublicPortalLayout from "./components/PublicPortalLayout";
 import AdminPortalLayout from "./components/AdminPortalLayout";
 import AdminPortalContent from "./components/AdminPortalContent";
-import ProfileEditForm from "./components/ProfileEditForm";
-import MyBadges from "./components/MyBadges";
+import PublicPortalContent from "./components/PublicPortalContent";
 
 
 export default function App(){
@@ -63,13 +55,17 @@ export default function App(){
   selectedBadge={selectedBadge} setSelectedBadge={setSelectedBadge} selectedMember={selectedMember}
   awards={awards} ranks={ranks} manageMember={manageMember} revokeMemberAccess={revokeMemberAccess}
 >
-  {view==="home"&&<><PublicHomeHero onJoin={!session?()=>{setShowAuth(true);setAuthMode("signup")}:null}/><CommunityPosts supabase={supabase} profile={session?profile:null} canModerate={canPublish} onMessage={setMessage}/><PublicHomeSections newsPosts={newsPosts} events={events} members={members} awards={awards} badges={badges} onNews={()=>setView("news")} onEvents={()=>setView("events")} onMembers={()=>setView("members")} onBadges={()=>setView("badges")} onBadge={setSelectedBadge} onProfile={setSelectedMember}/></>}
-  {view==="community"&&<CommunityPosts supabase={supabase} profile={session?profile:null} canModerate={canPublish}/>}
-  {view==="news"&&<PublicNewsPage newsPosts={newsPosts}/>}
-  {view==="events"&&<PublicEventsPage events={events}/>}
-  {view==="members"&&<PublicMemberDirectory members={filtered.filter(m=>m.status==="approved")} awards={awards} search={search} onSearchChange={setSearch} onBadge={setSelectedBadge} onProfile={setSelectedMember}/>}
-  {view==="badges"&&<PublicBadgesPage badges={badges}/>}
-  {view==="myprofile"&&session&&profile&&<section className="public-profile-view"><div className="public-section-head"><div><span className="eyebrow">SUA JORNADA</span><h2>Meu perfil</h2><p>Suas informações, patente e conquistas no portal.</p></div></div><div className="panel profile-panel"><div className="panel-heading"><div><h3>Personalizar meu perfil</h3><p>Somente você pode alterar estas informações.</p></div></div><ProfileEditForm profile={profile} discord={discord} tagline={tagline} avatarFile={avatarFile} busy={busy} onDiscordChange={setDiscord} onTaglineChange={setTagline} onAvatarChange={setAvatarFile} onSubmit={updateProfile}/></div><MyBadges awards={awards.filter(a=>a.member_id===profile.id)} onBadge={setSelectedBadge}/></section>}
+  <PublicPortalContent
+    view={view} session={session} profile={profile} setShowAuth={setShowAuth}
+    setAuthMode={setAuthMode} supabase={supabase} setMessage={setMessage}
+    canPublish={canPublish} newsPosts={newsPosts} events={events} members={members}
+    awards={awards} badges={badges} setView={setView}
+    setSelectedBadge={setSelectedBadge} setSelectedMember={setSelectedMember}
+    filtered={filtered} search={search} setSearch={setSearch}
+    discord={discord} setDiscord={setDiscord} tagline={tagline} setTagline={setTagline}
+    avatarFile={avatarFile} setAvatarFile={setAvatarFile} busy={busy}
+    updateProfile={updateProfile}
+  />
 </PublicPortalLayout>;
  const myAwards=awards.filter(a=>a.member_id===profile.id);
  return <AdminPortalLayout
