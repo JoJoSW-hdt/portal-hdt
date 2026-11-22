@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import RichTextEditor from "../RichTextEditor";
 import { Newspaper, Pencil, Trash2 } from "lucide-react";
 
-const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"draft"};
+const emptyEvent={title:"",summary:"",starts_at:"",ends_at:"",location:"",event_type:"Encontro",description_html:"",has_badge_reward:false,reward_badge_id:"",reward_description:"",status:"published"};
 const toLocalDateTime=(value)=>{if(!value)return "";const d=new Date(value);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};
 
 export default function EventAdminPanel({supabase,profile,events=[],badges=[],onRefresh,onMessage}) {
@@ -22,7 +22,7 @@ export default function EventAdminPanel({supabase,profile,events=[],badges=[],on
       p_reward_description:event.has_badge_reward?event.reward_description:"",p_status:event.status
     });
     setBusy(false);if(error){onMessage(error.message);return}
-    onMessage(event.status==="published"?"Evento publicado!":"Rascunho do evento salvo.");
+    onMessage("Evento publicado!");
     setEvent(emptyEvent);setEditingEvent(null);onRefresh();
   }
   async function deleteEvent(id){if(!confirm("Excluir este evento?"))return;const {error}=await supabase.rpc("admin_delete_event",{p_event_id:id});onMessage(error?.message||"Evento excluído.");if(!error)onRefresh()}
@@ -39,10 +39,9 @@ export default function EventAdminPanel({supabase,profile,events=[],badges=[],on
           <label>Local / plataforma<input maxLength="160" value={event.location} onChange={e=>setEvent({...event,location:e.target.value})} placeholder="Discord, Twitch, jogo/servidor ou endereço"/></label>
         </div>
         <label>Descrição completa</label>
-        <RichTextEditor key={editingEvent?.id||"new-event"} initialHtml={event.description_html} supabase={supabase} profile={profile} onSave={saveEvent} busy={busy} submitLabel={editingEvent?"Salvar evento":event.status==="published"?"Publicar evento":"Salvar rascunho"}/>
+        <RichTextEditor key={editingEvent?.id||"new-event"} initialHtml={event.description_html} supabase={supabase} profile={profile} onSave={saveEvent} busy={busy} submitLabel={editingEvent?"Salvar alterações":"Publicar evento"}/>
         <label className="permission-option"><input type="checkbox" checked={event.has_badge_reward} onChange={e=>setEvent({...event,has_badge_reward:e.target.checked,reward_badge_id:e.target.checked?event.reward_badge_id:""})}/> Este evento terá uma badge como premiação</label>
         {event.has_badge_reward&&<div className="event-fields"><label>Badge da premiação<select value={event.reward_badge_id} onChange={e=>setEvent({...event,reward_badge_id:e.target.value})}><option value="">Definir depois / não vinculada</option>{badges.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label><label>Detalhes da premiação<input maxLength="240" value={event.reward_description} onChange={e=>setEvent({...event,reward_description:e.target.value})} placeholder="Quem recebe, critérios, quantidade..."/></label></div>}
-        <label>Status<select value={event.status} onChange={e=>setEvent({...event,status:e.target.value})}><option value="draft">Rascunho</option><option value="published">Publicar evento</option></select></label>
         {editingEvent&&<button type="button" className="outline-btn" onClick={()=>{setEditingEvent(null);setEvent(emptyEvent)}}>Cancelar edição</button>}
       </div>
     </div>
