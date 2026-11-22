@@ -39,7 +39,7 @@ export default function App(){
   setMembers, setBadges, setAwards, setRanks, setNewsPosts, setEvents,
   setStaffPermissions, setProfile, setLoading, setMessage,
  });
- const { isAdmin, isFounder, isStaff, canManageEvents, canApprove, canGrant, canPublish, canGrantExp, canEnterAdmin } = usePortalPermissions(profile, staffPermissions);
+ const { isAdmin, isFounder, canManageEvents, canApprove, canGrant, canPublish, canGrantExp, canEnterAdmin } = usePortalPermissions(profile, staffPermissions);
  const {
   submitAuth, updateProfile, memberAction, saveBadge, deleteBadge,
   grant, revoke, manageMember, revokeMemberAccess,
