@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, X, Pencil, Trash2, RefreshCw, ShieldCheck, Crown } from "lucide-react";
+import { fetchRankPromotionSuggestions, fetchMemberExpHistory } from "../lib/founderAdminData";
+import { saveStaffPermissions, saveCommunityRank, deleteCommunityRank, adjustMemberExp, scanRankPromotions, reviewRankPromotion, updateStaffRole } from "../lib/founderAdminActions";
 
 const emptyRank={name:"",description:"",color:"#22C55E",sort_order:1,min_days:0,min_exp:0,active:true};
 const defaultPermissions={approve_members:true,grant_badges:true,grant_exp:true,publish_news:true};
@@ -14,42 +16,103 @@ export default function FounderAdminPanel({supabase,members,ranks,staffPermissio
   useEffect(()=>setPermissions({...defaultPermissions,...(staffPermissions||{})}),[staffPermissions]);
 
   async function loadSuggestions(){
-    const {data,error}=await supabase.from("rank_promotion_requests")
-      .select("*,profiles!rank_promotion_requests_member_id_fkey(display_name,username,created_at),community_ranks!rank_promotion_requests_suggested_rank_id_fkey(name,color,min_exp)")
-      .eq("status","pending").order("created_at",{ascending:false});
-    if(error)onMessage(error.message); else setSuggestions(data||[]);
+    try {
+      setSuggestions(await fetchRankPromotionSuggestions(supabase));
+    } catch (error) {
+      onMessage(error.message);
+    }
   }
   async function loadExpHistory(){
-    const {data,error}=await supabase.from("member_exp_transactions")
-      .select("*,profiles!member_exp_transactions_member_id_fkey(display_name,username)")
-      .order("created_at",{ascending:false}).limit(40);
-    if(error)onMessage(error.message); else setExpHistory(data||[]);
+    try {
+      setExpHistory(await fetchMemberExpHistory(supabase));
+    } catch (error) {
+      onMessage(error.message);
+    }
   }
   useEffect(()=>{loadSuggestions();loadExpHistory()},[]);
 
   async function savePermissions(){
-    setBusy(true);const {error}=await supabase.rpc("admin_update_staff_permissions",{p_permissions:permissions});setBusy(false);
-    onMessage(error?.message||"Permissões da Staff atualizadas.");if(!error)onRefresh();
+    setBusy(true);
+    try {
+      await saveStaffPermissions(supabase, permissions);
+      onMessage("Permissões da Staff atualizadas.");
+      onRefresh();
+    } catch (error) {
+      onMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
   }
   async function saveRank(e){
-    e.preventDefault();setBusy(true);
-    const {error}=await supabase.rpc("admin_save_community_rank",{
-      p_rank_id:editingRank?.id||null,p_name:rank.name,p_description:rank.description,p_color:rank.color,
-      p_sort_order:Number(rank.sort_order),p_min_days:Number(rank.min_days),p_min_exp:Number(rank.min_exp),p_active:rank.active
-    });
-    setBusy(false);if(error){onMessage(error.message);return}
-    onMessage("Patente salva.");setRank(emptyRank);setEditingRank(null);onRefresh();
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await saveCommunityRank(supabase, editingRank, rank);
+      onMessage("Patente salva.");
+      setRank(emptyRank);
+      setEditingRank(null);
+      onRefresh();
+    } catch (error) {
+      onMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
   }
-  async function deleteRank(id){if(!confirm("Excluir esta patente?"))return;const {error}=await supabase.rpc("admin_delete_community_rank",{p_rank_id:id});onMessage(error?.message||"Patente excluída.");if(!error)onRefresh()}
+  async function deleteRank(id){
+    if(!confirm("Excluir esta patente?"))return;
+    try {
+      await deleteCommunityRank(supabase, id);
+      onMessage("Patente excluída.");
+      onRefresh();
+    } catch (error) {
+      onMessage(error.message);
+    }
+  }
   async function adjustExp(e){
-    e.preventDefault();setBusy(true);
-    const {error}=await supabase.rpc("founder_adjust_exp",{p_member_id:adjustMember,p_amount:Number(adjustAmount),p_reason:adjustReason});
-    setBusy(false);if(error){onMessage(error.message);return}
-    onMessage("Ajuste de EXP registrado no histórico.");setAdjustReason("");await Promise.all([onRefresh(),loadExpHistory()]);
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await adjustMemberExp(supabase, adjustMember, adjustAmount, adjustReason);
+      onMessage("Ajuste de EXP registrado no histórico.");
+      setAdjustReason("");
+      await Promise.all([onRefresh(), loadExpHistory()]);
+    } catch (error) {
+      onMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
   }
-  async function scanRanks(){setBusy(true);const {data,error}=await supabase.rpc("admin_scan_rank_promotions");setBusy(false);onMessage(error?.message||("Verificação concluída: "+(data||0)+" nova(s) sugestão(ões)."));if(!error)loadSuggestions()}
-  async function reviewSuggestion(id,approve){const {error}=await supabase.rpc("admin_review_rank_promotion",{p_request_id:id,p_approve:approve});onMessage(error?.message||(approve?"Promoção aprovada!":"Sugestão recusada."));if(!error){loadSuggestions();onRefresh()}}
-  async function assignStaff(memberId,role){const {error}=await supabase.rpc("admin_update_member",{p_member_id:memberId,p_status:null,p_role:role});onMessage(error?.message||(role==="staff"?"Cargo Staff atribuído.":"Cargo Staff removido."));if(!error)onRefresh()}
+  async function scanRanks(){
+    setBusy(true);
+    try {
+      const count = await scanRankPromotions(supabase);
+      onMessage("Verificação concluída: " + count + " nova(s) sugestão(ões).");
+      loadSuggestions();
+    } catch (error) {
+      onMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function reviewSuggestion(id, approve){
+    try {
+      await reviewRankPromotion(supabase, id, approve);
+      onMessage(approve ? "Promoção aprovada!" : "Sugestão recusada.");
+      loadSuggestions();
+      onRefresh();
+    } catch (error) {
+      onMessage(error.message);
+    }
+  }
+  async function assignStaff(memberId, role){
+    try {
+      await updateStaffRole(supabase, memberId, role);
+      onMessage(role === "staff" ? "Cargo Staff atribuído." : "Cargo Staff removido.");
+      onRefresh();
+    } catch (error) {
+      onMessage(error.message);
+    }
+  }
 
   return <section className="content">
     <div className="panel"><div className="panel-heading"><div><h3>Permissões da Staff</h3><p>O Fundador escolhe exatamente o que a equipe pode fazer.</p></div><ShieldCheck/></div>
