@@ -4,7 +4,7 @@ import { cleanHtml } from "../RichTextEditor";
 import { EventCard, PublicMember, BadgeCatalog } from "./PortalShared";
 
 export default function PublicHomeSections({ newsPosts, events, members, awards, badges, onNews, onEvents, onMembers, onBadges, onBadge, onProfile }) {
-  const publishedNews = newsPosts.filter(n => n.status === "published");
+  const publishedNews = newsPosts.filter(n => n.status === "published" && (!n.published_at || new Date(n.published_at) <= new Date()));
   const publishedEvents = events.filter(e => e.status === "published");
   const approvedMembers = members.filter(m => m.status === "approved");
 
