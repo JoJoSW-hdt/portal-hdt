@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import RichTextEditor, { cleanHtml } from "./RichTextEditor";
 import { fetchCommunityFeed } from "./lib/communityData";
-import { Heart, MessageCircle, Image as ImageIcon, Bold, Italic, Underline, List, AlignLeft, AlignCenter, AlignRight, Send, Pencil, Trash2, X, Newspaper } from "lucide-react";
+import { Heart, MessageCircle, Image as ImageIcon, Send, Pencil, Trash2, X, Newspaper } from "lucide-react";
 
 
 export default function CommunityPosts({supabase,profile,canModerate=false,onMessage=()=>{}}) {
