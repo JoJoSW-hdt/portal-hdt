@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RichTextEditor, { cleanHtml } from "./RichTextEditor";
+import { fetchCommunityFeed } from "./lib/communityData";
 import { Heart, MessageCircle, Image as ImageIcon, Bold, Italic, Underline, List, AlignLeft, AlignCenter, AlignRight, Send, Pencil, Trash2, X, Newspaper } from "lucide-react";
 
 
@@ -14,18 +15,14 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   const canInteract=profile?.status==="approved";
   async function refresh(){
     setLoading(true);
-    const [p,r,c,m]=await Promise.all([
-      supabase.from("community_posts").select("*").order("created_at",{ascending:false}),
-      supabase.from("community_post_reactions").select("*"),
-      supabase.from("community_post_comments").select("*").order("created_at"),
-      supabase.from("profiles").select("id,display_name,username,avatar_url,role")
-    ]);
-    const error=p.error||r.error||c.error||m.error;
-    if(error){onMessage(error.message);setLoading(false);return;}
-    const people=new Map((m.data||[]).map(x=>[x.id,x]));
-    const reactions=r.data||[],comments=c.data||[];
-    setPosts((p.data||[]).map(post=>({...post,author:people.get(post.author_id),reactions:reactions.filter(x=>x.post_id===post.id),comments:comments.filter(x=>x.post_id===post.id).map(x=>({...x,author:people.get(x.author_id)}))})));
-    setLoading(false);
+    try {
+      const feed = await fetchCommunityFeed(supabase);
+      setPosts(feed);
+    } catch (error) {
+      onMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
   }
   useEffect(()=>{refresh();},[supabase]);
   const selectedPost=selected?posts.find(p=>p.id===selected):null;
