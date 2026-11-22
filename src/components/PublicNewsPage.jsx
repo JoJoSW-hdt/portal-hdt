@@ -3,7 +3,7 @@ import { Leaf } from "lucide-react";
 import { cleanHtml } from "../RichTextEditor";
 
 export default function PublicNewsPage({ newsPosts }) {
-  const published = newsPosts.filter(n => n.status === "published");
+  const published = newsPosts.filter(n => n.status === "published" && (!n.published_at || new Date(n.published_at) <= new Date()));
 
   return <>
     <div className="public-section-head">
