@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Clock3 } from "lucide-react";
 import { hasSupabaseConfig, supabase } from "./lib/supabase";
-import FounderAdminPanel from "./components/FounderAdminPanel";
 import CommunityPosts from "./CommunityPosts";
 import { usePortalSession } from "./hooks/usePortalSession";
 import { usePortalData } from "./hooks/usePortalData";
@@ -9,24 +8,16 @@ import { usePortalActions } from "./hooks/usePortalActions";
 import { usePortalPermissions } from "./hooks/usePortalPermissions";
 import { usePortalFormState } from "./hooks/usePortalFormState";
 import { usePortalViewState } from "./hooks/usePortalViewState";
-import { roleNames, rarityNames, rarityOrder, Brand, ConfigNotice, BadgeCatalog } from "./components/PortalShared";
-import MemberApprovals from "./components/MemberApprovals";
-import DashboardOverview from "./components/DashboardOverview";
-import ProfileEditForm from "./components/ProfileEditForm";
-import MyBadges from "./components/MyBadges";
-import BadgeGrantPanel from "./components/BadgeGrantPanel";
-import BadgeAdminPanel from "./components/BadgeAdminPanel";
-import MemberDirectory from "./components/MemberDirectory";
+import { roleNames, Brand, ConfigNotice } from "./components/PortalShared";
 import PublicMemberDirectory from "./components/PublicMemberDirectory";
 import PublicNewsPage from "./components/PublicNewsPage";
 import PublicEventsPage from "./components/PublicEventsPage";
 import PublicBadgesPage from "./components/PublicBadgesPage";
 import PublicHomeHero from "./components/PublicHomeHero";
 import PublicHomeSections from "./components/PublicHomeSections";
-import NewsAdminPanel from "./components/NewsAdminPanel";
-import EventAdminPanel from "./components/EventAdminPanel";
 import PublicPortalLayout from "./components/PublicPortalLayout";
 import AdminPortalLayout from "./components/AdminPortalLayout";
+import AdminPortalContent from "./components/AdminPortalContent";
 
 
 export default function App(){
@@ -88,15 +79,26 @@ export default function App(){
   selectedMember={selectedMember} awards={awards} ranks={ranks} manageMember={manageMember}
   revokeMemberAccess={revokeMemberAccess} onExpGranted={async()=>{await loadPublic();await loadProfile()}}
 >
-  {view==="dashboard"&&<DashboardOverview profile={profile} membersCount={members.length} badgesCount={badges.length} myAwards={myAwards} onEditProfile={()=>setView("myprofile")} onBadge={setSelectedBadge}/>}
-  {view==="members"&&<MemberDirectory members={filtered} awards={awards} search={search} onSearchChange={setSearch} onBadge={setSelectedBadge} onProfile={setSelectedMember}/>}
-  {view==="myprofile"&&<section className="content"><div className="panel profile-panel"><div className="panel-heading"><div><h3>Personalizar meu perfil</h3><p>Somente você pode alterar estas informações.</p></div></div><ProfileEditForm profile={profile} discord={discord} tagline={tagline} avatarFile={avatarFile} busy={busy} onDiscordChange={setDiscord} onTaglineChange={setTagline} onAvatarChange={setAvatarFile} onSubmit={updateProfile}/></div><MyBadges awards={myAwards} onBadge={setSelectedBadge}/></section>}
-  {view==="badges"&&<section className="content"><div className="panel"><div className="panel-heading"><div><h3>Catálogo de honrarias</h3><p>Conheça os distintivos existentes no portal.</p></div></div><BadgeCatalog badges={badges}/></div></section>}
-  {view==="approvals"&&canApprove&&<MemberApprovals pending={pending} onAction={memberAction}/>}
-  {view==="badgeadmin"&&isAdmin&&<BadgeAdminPanel editingBadge={editingBadge} badgeName={badgeName} badgeDesc={badgeDesc} badgeRarity={badgeRarity} badgeExp={badgeExp} badgeFile={badgeFile} busy={busy} badges={badges} rarityNames={rarityNames} rarityOrder={rarityOrder} onSave={saveBadge} onNameChange={setBadgeName} onDescriptionChange={setBadgeDesc} onRarityChange={setBadgeRarity} onExpChange={setBadgeExp} onFileChange={setBadgeFile} onCancelEdit={()=>{setEditingBadge(null);setBadgeName("");setBadgeDesc("");setBadgeRarity("comum");setBadgeExp(0);setBadgeFile(null)}} onEdit={b=>{setEditingBadge(b);setBadgeName(b.name);setBadgeDesc(b.description);setBadgeRarity(b.rarity);setBadgeExp(b.exp_reward||0);setBadgeFile(null);window.scrollTo({top:0,behavior:"smooth"})}} onDelete={deleteBadge}/>}
-  {view==="grant"&&canGrant&&<BadgeGrantPanel members={members} badges={badges} awards={awards} rarityNames={rarityNames} grantMember={grantMember} grantBadge={grantBadge} onMemberChange={setGrantMember} onBadgeChange={setGrantBadge} onGrant={grant} onRevoke={revoke}/>}
-  {view==="newsadmin"&&canPublish&&<NewsAdminPanel supabase={supabase} profile={profile} newsPosts={newsPosts} onRefresh={loadPublic} onMessage={setMessage}/>}
-  {view==="eventsadmin"&&canManageEvents&&<EventAdminPanel supabase={supabase} profile={profile} events={events} badges={badges} onRefresh={loadPublic} onMessage={setMessage}/>}
-  {view==="ranks"&&isFounder&&<FounderAdminPanel supabase={supabase} members={members} ranks={ranks} staffPermissions={staffPermissions} onRefresh={loadPublic} onMessage={setMessage}/>}
-</AdminPortalLayout>;
+  <AdminPortalContent
+   view={view} setView={setView} profile={profile} members={members} badges={badges}
+   awards={awards} ranks={ranks} newsPosts={newsPosts} events={events}
+   filtered={filtered} search={search} setSearch={setSearch}
+   selectedBadge={selectedBadge} setSelectedBadge={setSelectedBadge}
+   selectedMember={selectedMember} setSelectedMember={setSelectedMember}
+   discord={discord} setDiscord={setDiscord} tagline={tagline} setTagline={setTagline}
+   avatarFile={avatarFile} setAvatarFile={setAvatarFile} busy={busy}
+   updateProfile={updateProfile} myAwards={myAwards} pending={pending}
+   canApprove={canApprove} memberAction={memberAction} isAdmin={isAdmin}
+   editingBadge={editingBadge} badgeName={badgeName} badgeDesc={badgeDesc}
+   badgeRarity={badgeRarity} badgeExp={badgeExp} badgeFile={badgeFile}
+   saveBadge={saveBadge} setBadgeName={setBadgeName} setBadgeDesc={setBadgeDesc}
+   setBadgeRarity={setBadgeRarity} setBadgeExp={setBadgeExp} setBadgeFile={setBadgeFile}
+   setEditingBadge={setEditingBadge} deleteBadge={deleteBadge}
+   canGrant={canGrant} canPublish={canPublish} grantMember={grantMember}
+   grantBadge={grantBadge} setGrantMember={setGrantMember} setGrantBadge={setGrantBadge}
+   grant={grant} revoke={revoke} supabase={supabase} loadPublic={loadPublic}
+   setMessage={setMessage} canManageEvents={canManageEvents} isFounder={isFounder}
+   staffPermissions={staffPermissions}
+  />
+ </AdminPortalLayout>;
 }
