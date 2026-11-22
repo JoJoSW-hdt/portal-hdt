@@ -18,6 +18,8 @@ import PublicHomeSections from "./components/PublicHomeSections";
 import PublicPortalLayout from "./components/PublicPortalLayout";
 import AdminPortalLayout from "./components/AdminPortalLayout";
 import AdminPortalContent from "./components/AdminPortalContent";
+import ProfileEditForm from "./components/ProfileEditForm";
+import MyBadges from "./components/MyBadges";
 
 
 export default function App(){
