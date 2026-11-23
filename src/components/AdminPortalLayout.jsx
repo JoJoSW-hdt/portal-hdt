@@ -7,7 +7,7 @@ export default function AdminPortalLayout({
   profile, roleNames, view, setView, setAdminMode, setDiscord, setTagline,
   supabase, canApprove, canGrant, canGrantExp, canPublish, canManageEvents,
   isAdmin, isFounder, message, setMessage, selectedBadge, setSelectedBadge,
-  selectedMember, awards, ranks, manageMember, revokeMemberAccess,
+  selectedMember, setSelectedMember, awards, ranks, manageMember, revokeMemberAccess,
   onExpGranted, children
 }) {
   const titles={dashboard:"Visão geral",members:"Membros",myprofile:"Meu perfil",badges:"Catálogo de badges",approvals:"Aprovações",badgeadmin:"Gerenciar badges",grant:"Conceder badges",newsadmin:"Gerenciar notícias",eventsadmin:"Gerenciar eventos",ranks:"Configurar patentes",community:"Comunidade"};
