@@ -114,28 +114,35 @@ function MemberModal({
     }
   }
 
+  const closeModal = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    onClose?.();
+  };
+
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="member-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Perfil completo de ${member.display_name || "membro"}`}
-        onClick={(event) => event.stopPropagation()}
-      >
+    <div className="modal-backdrop" onPointerDown={(event) => {
+      if (event.target === event.currentTarget) closeModal(event);
+    }}>
+      <div className="member-modal-shell">
         <button
           type="button"
           className="modal-close"
           aria-label="Fechar perfil"
           title="Fechar perfil"
-          onClick={(event) => {
-            event.stopPropagation();
-            onClose?.();
-          }}
+          onPointerDown={closeModal}
+          onClick={closeModal}
         >
           <X />
         </button>
-
+        <div
+          className="member-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Perfil completo de ${member.display_name || "membro"}`}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+        >
         <ProfilePreview member={member} awards={awards} onBadge={onBadge} />
 
         {canGrantExp && member.status === "approved" && (
@@ -216,6 +223,7 @@ function MemberModal({
             {member.status === "suspended" && <p className="member-admin-error">Este acesso já está revogado.</p>}
           </section>
         )}
+        </div>
       </div>
     </div>
   );
