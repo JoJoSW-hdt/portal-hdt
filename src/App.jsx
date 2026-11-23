@@ -74,7 +74,7 @@ export default function App(){
   canApprove={canApprove} canGrant={canGrant} canGrantExp={canGrantExp} canPublish={canPublish}
   canManageEvents={canManageEvents} isAdmin={isAdmin} isFounder={isFounder}
   message={message} setMessage={setMessage} selectedBadge={selectedBadge} setSelectedBadge={setSelectedBadge}
-  selectedMember={selectedMember} awards={awards} ranks={ranks} manageMember={manageMember}
+  selectedMember={selectedMember} setSelectedMember={setSelectedMember} awards={awards} ranks={ranks} manageMember={manageMember}
   revokeMemberAccess={revokeMemberAccess} onExpGranted={async()=>{await loadPublic();await loadProfile()}}
 >
   <AdminPortalContent
