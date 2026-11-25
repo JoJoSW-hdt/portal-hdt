@@ -19,10 +19,10 @@ export default function EventAdminPanel({supabase,profile,events=[],badges=[],on
       p_event_id:editingEvent?.id||null,p_title:event.title,p_summary:event.summary,p_starts_at:new Date(event.starts_at).toISOString(),
       p_ends_at:event.ends_at?new Date(event.ends_at).toISOString():null,p_location:event.location,p_event_type:event.event_type,
       p_description_html:descriptionHtml,p_has_badge_reward:event.has_badge_reward,p_reward_badge_id:event.has_badge_reward?(event.reward_badge_id||null):null,
-      p_reward_description:event.has_badge_reward?event.reward_description:"",p_status:"published"
+      p_reward_description:event.has_badge_reward?event.reward_description:"",p_status:event.status
     });
     setBusy(false);if(error){onMessage(error.message);return}
-    onMessage("Evento publicado!");
+    onMessage(event.status==="draft"?"Rascunho salvo!":"Evento publicado!");
     setEvent(emptyEvent);setEditingEvent(null);onRefresh();
   }
   async function deleteEvent(id){if(!confirm("Excluir este evento?"))return;const {error}=await supabase.rpc("admin_delete_event",{p_event_id:id});onMessage(error?.message||"Evento excluído.");if(!error)onRefresh()}
@@ -36,10 +36,11 @@ export default function EventAdminPanel({supabase,profile,events=[],badges=[],on
           <label>Tipo de evento<select value={event.event_type} onChange={e=>setEvent({...event,event_type:e.target.value})}><option>Encontro</option><option>Torneio</option><option>Live</option><option>Competição</option><option>Especial</option><option>Outro</option></select></label>
           <label>Data e horário de início<input type="datetime-local" required value={event.starts_at} onChange={e=>setEvent({...event,starts_at:e.target.value})}/></label>
           <label>Data e horário de término<input type="datetime-local" value={event.ends_at} onChange={e=>setEvent({...event,ends_at:e.target.value})}/></label>
+          <label>Status<select value={event.status} onChange={e=>setEvent({...event,status:e.target.value})}><option value="draft">Rascunho</option><option value="published">Publicado</option></select></label>
           <label>Local / plataforma<input maxLength="160" value={event.location} onChange={e=>setEvent({...event,location:e.target.value})} placeholder="Discord, Twitch, jogo/servidor ou endereço"/></label>
         </div>
         <label>Descrição completa</label>
-        <RichTextEditor key={editingEvent?.id||"new-event"} initialHtml={event.description_html} supabase={supabase} profile={profile} onSave={saveEvent} busy={busy} submitLabel={editingEvent?"Salvar alterações":"Publicar evento"}/>
+        <RichTextEditor key={editingEvent?.id||"new-event"} initialHtml={event.description_html} supabase={supabase} profile={profile} onSave={saveEvent} busy={busy} submitLabel={event.status==="draft"?"Salvar rascunho":editingEvent?"Salvar alterações":"Publicar evento"}/>
         <label className="permission-option"><input type="checkbox" checked={event.has_badge_reward} onChange={e=>setEvent({...event,has_badge_reward:e.target.checked,reward_badge_id:e.target.checked?event.reward_badge_id:""})}/> Este evento terá uma badge como premiação</label>
         {event.has_badge_reward&&<div className="event-fields"><label>Badge da premiação<select value={event.reward_badge_id} onChange={e=>setEvent({...event,reward_badge_id:e.target.value})}><option value="">Definir depois / não vinculada</option>{badges.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label><label>Detalhes da premiação<input maxLength="240" value={event.reward_description} onChange={e=>setEvent({...event,reward_description:e.target.value})} placeholder="Quem recebe, critérios, quantidade..."/></label></div>}
         {editingEvent&&<button type="button" className="outline-btn" onClick={()=>{setEditingEvent(null);setEvent(emptyEvent)}}>Cancelar edição</button>}
