@@ -118,3 +118,4 @@ create index if not exists news_posts_author_id_idx on public.news_posts(author_
 create index if not exists profiles_community_rank_id_idx on public.profiles(community_rank_id);
 create index if not exists rank_promotion_requests_reviewed_by_idx on public.rank_promotion_requests(reviewed_by);
 create index if not exists rank_promotion_requests_suggested_rank_id_idx on public.rank_promotion_requests(suggested_rank_id);
+create index if not exists member_exp_transactions_created_by_idx on public.member_exp_transactions(created_by);
