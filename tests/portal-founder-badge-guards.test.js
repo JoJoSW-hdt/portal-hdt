@@ -58,3 +58,24 @@ test("Founder is excluded from Staff assignment UI and protected in member modal
   assert.match(founderPanel, /m\.status==="approved"&&m\.role!=="founder"/);
   assert.match(memberModal, /member\.role === "founder"[\s\S]*cargo Founder é protegido/i);
 });
+
+
+test("EXP and badge grants lock the member row before checking approval", () => {
+  const expStart = migration.indexOf("create or replace function public.admin_grant_exp");
+  const expEnd = migration.indexOf("create or replace function public.admin_update_member", expStart);
+  const expBlock = migration.slice(expStart, expEnd);
+  assert.match(expBlock, /from public\\.profiles[\\s\\S]*for update/i);
+
+  const badgeStart = migration.indexOf("create or replace function public.admin_grant_badge");
+  const badgeEnd = migration.indexOf("create or replace function public.admin_delete_badge", badgeStart);
+  const badgeBlock = migration.slice(badgeStart, badgeEnd);
+  assert.match(badgeBlock, /from public\\.profiles[\\s\\S]*for update/i);
+});
+
+test("badge revocation is recorded in the administrative audit log", () => {
+  const start = migration.indexOf("create or replace function public.admin_revoke_badge");
+  const block = migration.slice(start);
+  assert.match(block, /for update of mb/i);
+  assert.match(block, /insert into public\\.member_admin_audit/i);
+  assert.match(block, /'badge_revoked'/i);
+});
