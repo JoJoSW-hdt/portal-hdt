@@ -6,6 +6,10 @@ const migration = readFileSync(
   new URL("../supabase/migrations/20261127195500_protect_founder_and_badge_history.sql", import.meta.url),
   "utf8",
 );
+const rankMigration = readFileSync(
+  new URL("../supabase/migrations/20261127211000_serialize_founder_exp_and_rank_review.sql", import.meta.url),
+  "utf8",
+);
 const hardeningMigration = readFileSync(
   new URL("../supabase/migrations/20261127210000_harden_exp_and_badge_revoke_audit.sql", import.meta.url),
   "utf8",
@@ -82,4 +86,21 @@ test("badge revocation is recorded in the administrative audit log", () => {
   assert.match(block, /for update of mb/i);
   assert.match(block, /insert into public[.]member_admin_audit/i);
   assert.match(block, /'badge_revoked'/i);
+});
+
+
+test("Founder EXP adjustments lock the target member and require approval", () => {
+  const start = rankMigration.indexOf("create or replace function public.founder_adjust_exp");
+  const end = rankMigration.indexOf("create or replace function public.admin_review_rank_promotion", start);
+  const block = rankMigration.slice(start, end);
+  assert.match(block, /from public[.]profiles[\s\S]*for update/i);
+  assert.match(block, /v_member_status <> 'approved'/i);
+});
+
+test("rank-promotion reviews lock pending requests and approved member rows", () => {
+  const start = rankMigration.indexOf("create or replace function public.admin_review_rank_promotion");
+  const block = rankMigration.slice(start);
+  assert.match(block, /status = 'pending'[\s\S]*for update/i);
+  assert.match(block, /from public[.]profiles[\s\S]*for update/i);
+  assert.match(block, /p_approve is null/i);
 });
