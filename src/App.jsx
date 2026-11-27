@@ -15,7 +15,7 @@ import PublicPortalContent from "./components/PublicPortalContent";
 
 
 export default function App(){
- const [profile,setProfile]=useState(null),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:true,grant_badges:true,grant_exp:true,publish_news:true}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[showAuth,setShowAuth]=useState(false);
+ const [profile,setProfile]=useState(null),[members,setMembers]=useState([]),[badges,setBadges]=useState([]),[awards,setAwards]=useState([]),[ranks,setRanks]=useState([]),[newsPosts,setNewsPosts]=useState([]),[events,setEvents]=useState([]),[staffPermissions,setStaffPermissions]=useState({approve_members:false,grant_badges:false,grant_exp:false,publish_news:false}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(""),[showAuth,setShowAuth]=useState(false);
  const {
   authMode,setAuthMode,email,setEmail,password,setPassword,username,setUsername,
   displayName,setDisplayName,discord,setDiscord,tagline,setTagline,avatarFile,setAvatarFile,
@@ -44,7 +44,7 @@ export default function App(){
   setSelectedMember, loadProfile, loadPublic,
  });
  if(!hasSupabaseConfig)return <ConfigNotice/>;if(loading)return <div className="loading-screen"><div className="spinner"/>Preparando sua jornada...</div>;
- if(session&&!profile)return <div className="loading-screen">{message||"Preparando perfil..."}</div>;
+ if(session&&!profile)return <main className="auth-wrap"><section className="auth-card pending-card"><Brand/><h1>Não foi possível carregar seu perfil</h1><p>{message||"Não encontramos os dados desta conta no portal."}</p><button className="primary-btn" onClick={loadProfile}>Tentar novamente</button><button className="outline-btn" onClick={()=>supabase.auth.signOut()}>Sair da conta</button></section></main>;
  if(session&&profile.status!=="approved")return <main className="auth-wrap"><section className="auth-card pending-card"><Brand/><div className="pending-icon"><Clock3 size={34}/></div><h1>{profile.status==="suspended"?"Acesso ao portal revogado":"Seu cadastro está em análise"}</h1><p>{profile.status==="suspended"?"O acesso desta conta foi revogado pela administração. Se acredita que isso aconteceu por engano, entre em contato com a equipe.":"A administração precisa aprovar sua entrada antes de liberar o acesso."}</p><button className="outline-btn" onClick={()=>supabase.auth.signOut()}>Sair da conta</button></section></main>;
  if(!adminMode)return <PublicPortalLayout
   profile={profile} session={session} roleNames={roleNames} canEnterAdmin={canEnterAdmin}

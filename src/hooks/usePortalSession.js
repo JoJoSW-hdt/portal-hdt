@@ -4,10 +4,14 @@ export function usePortalSession(supabase, { setAdminMode, setView }) {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) return undefined;
 
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    let active = true;
+    let receivedAuthEvent = false;
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      receivedAuthEvent = true;
+      if (!active) return;
       setSession(nextSession);
       if (!nextSession) {
         setAdminMode(false);
@@ -15,8 +19,21 @@ export function usePortalSession(supabase, { setAdminMode, setView }) {
       }
     });
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    supabase.auth.getSession()
+      .then(({ data, error }) => {
+        if (active && !receivedAuthEvent) {
+          setSession(error ? null : data.session);
+        }
+      })
+      .catch(() => {
+        if (active && !receivedAuthEvent) setSession(null);
+      });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [supabase, setAdminMode, setView]);
 
   return [session, setSession];
 }
