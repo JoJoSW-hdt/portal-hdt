@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pencil, Trash2, Newspaper } from "lucide-react";
 import RichTextEditor from "../RichTextEditor";
+import { resolveNewsPublishedAt } from "../lib/newsSchedule";
 
 const emptyNews={title:"",summary:"",body:"",scheduledAt:""};
 const toLocalDateTime=(value)=>{
@@ -19,7 +20,7 @@ export default function NewsAdminPanel({supabase,profile,newsPosts,onRefresh,onM
     if(!bodyHtml.replace(/<[^>]*>/g,"").trim()&&!bodyHtml.includes("<img")){onMessage("Escreva o conteúdo da notícia ou insira uma imagem.");return;}
     const scheduledAt=news.scheduledAt?new Date(news.scheduledAt).toISOString():null;
     const willSchedule=scheduledAt&&new Date(scheduledAt)>new Date();
-    const publishedAt=scheduledAt||(editingNews?.status==="published"?editingNews.published_at:null);
+    const publishedAt=resolveNewsPublishedAt(scheduledAt,editingNews);
     setBusy(true);
     const {error}=await supabase.rpc("admin_save_news",{
       p_news_id:editingNews?.id||null,
