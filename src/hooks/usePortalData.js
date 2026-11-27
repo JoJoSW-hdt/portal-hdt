@@ -40,7 +40,7 @@ export function usePortalData({
     try {
       const result = await fetchAuthenticatedProfile(supabase, session.user.id);
       if (result.error) setMessage(result.error.message);
-      if (result.staffPermissions) setStaffPermissions(result.staffPermissions);
+      setStaffPermissions(result.staffPermissions || { approve_members: false, grant_badges: false, grant_exp: false, publish_news: false });
       setProfile(result.profile);
     } catch (error) {
       setMessage(error.message || "Não foi possível carregar seu perfil.");
@@ -56,6 +56,7 @@ export function usePortalData({
     if (session?.user) loadProfile();
     else {
       setProfile(null);
+      setStaffPermissions({ approve_members: false, grant_badges: false, grant_exp: false, publish_news: false });
       setLoading(false);
     }
   }, [hasSupabaseConfig, session?.user?.id, loadPublic, loadProfile, setProfile, setLoading]);
