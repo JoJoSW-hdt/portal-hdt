@@ -48,7 +48,7 @@ test("badge grants require an approved target member", () => {
 
 test("deleting an awarded badge is blocked to preserve member history", () => {
   const start = migration.indexOf("create or replace function public.admin_delete_badge");
-  const block = hardeningMigration.slice(start);
+  const block = migration.slice(start);
   assert.match(block, /for update/i);
   assert.match(block, /from public\.member_badges[\s\S]*badge_id = p_badge_id/i);
   assert.match(block, /preservar o histórico dos membros/i);
@@ -78,7 +78,7 @@ test("EXP and badge grants lock the member row before checking approval", () => 
 
 test("badge revocation is recorded in the administrative audit log", () => {
   const start = hardeningMigration.indexOf("create or replace function public.admin_revoke_badge");
-  const block = migration.slice(start);
+  const block = hardeningMigration.slice(start);
   assert.match(block, /for update of mb/i);
   assert.match(block, /insert into public\\.member_admin_audit/i);
   assert.match(block, /'badge_revoked'/i);
