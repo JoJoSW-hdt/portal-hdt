@@ -10,8 +10,8 @@ export default function AuthModal({ authMode, setAuthMode, onClose, onSubmit, us
       <h2>{authMode==="login"?"Entre na sua jornada":"Crie sua conta"}</h2>
       {authMode==="signup"&&<p className="signup-email-hint">Depois de criar sua conta, aguarde a análise da equipe. Confira também sua caixa de spam ou lixo eletrônico para não perder mensagens de confirmação do Heróis do Tempo.</p>}
       {authMode==="signup"&&<>
-        <label>Nick do portal<input required minLength="3" value={username} onChange={e=>setUsername(e.target.value)} placeholder="Seu apelido"/></label>
-        <label>Nome de exibição<input required value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="Como quer aparecer"/></label>
+        <label>Nick do portal<input required minLength="3" maxLength="24" value={username} onChange={e=>setUsername(e.target.value)} placeholder="Seu apelido"/></label>
+        <label>Nome de exibição<input required minLength="1" maxLength="60" value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="Como quer aparecer"/></label>
       </>}
       <label>E-mail<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label>
       <label>Senha<input type="password" minLength="8" required value={password} onChange={e=>setPassword(e.target.value)}/></label>
