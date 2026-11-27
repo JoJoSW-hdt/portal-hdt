@@ -6,6 +6,10 @@ const migration = readFileSync(
   new URL("../supabase/migrations/20261127195500_protect_founder_and_badge_history.sql", import.meta.url),
   "utf8",
 );
+const hardeningMigration = readFileSync(
+  new URL("../supabase/migrations/20261127210000_harden_exp_and_badge_revoke_audit.sql", import.meta.url),
+  "utf8",
+);
 const badgePanel = readFileSync(
   new URL("../src/components/BadgeGrantPanel.jsx", import.meta.url),
   "utf8",
@@ -44,7 +48,7 @@ test("badge grants require an approved target member", () => {
 
 test("deleting an awarded badge is blocked to preserve member history", () => {
   const start = migration.indexOf("create or replace function public.admin_delete_badge");
-  const block = migration.slice(start);
+  const block = hardeningMigration.slice(start);
   assert.match(block, /for update/i);
   assert.match(block, /from public\.member_badges[\s\S]*badge_id = p_badge_id/i);
   assert.match(block, /preservar o histórico dos membros/i);
@@ -61,19 +65,19 @@ test("Founder is excluded from Staff assignment UI and protected in member modal
 
 
 test("EXP and badge grants lock the member row before checking approval", () => {
-  const expStart = migration.indexOf("create or replace function public.admin_grant_exp");
-  const expEnd = migration.indexOf("create or replace function public.admin_update_member", expStart);
-  const expBlock = migration.slice(expStart, expEnd);
+  const expStart = hardeningMigration.indexOf("create or replace function public.admin_grant_exp");
+  const expEnd = hardeningMigration.indexOf("create or replace function public.admin_grant_badge", expStart);
+  const expBlock = hardeningMigration.slice(expStart, expEnd);
   assert.match(expBlock, /from public\\.profiles[\\s\\S]*for update/i);
 
-  const badgeStart = migration.indexOf("create or replace function public.admin_grant_badge");
-  const badgeEnd = migration.indexOf("create or replace function public.admin_delete_badge", badgeStart);
-  const badgeBlock = migration.slice(badgeStart, badgeEnd);
+  const badgeStart = hardeningMigration.indexOf("create or replace function public.admin_grant_badge");
+  const badgeEnd = hardeningMigration.indexOf("create or replace function public.admin_revoke_badge", badgeStart);
+  const badgeBlock = hardeningMigration.slice(badgeStart, badgeEnd);
   assert.match(badgeBlock, /from public\\.profiles[\\s\\S]*for update/i);
 });
 
 test("badge revocation is recorded in the administrative audit log", () => {
-  const start = migration.indexOf("create or replace function public.admin_revoke_badge");
+  const start = hardeningMigration.indexOf("create or replace function public.admin_revoke_badge");
   const block = migration.slice(start);
   assert.match(block, /for update of mb/i);
   assert.match(block, /insert into public\\.member_admin_audit/i);
