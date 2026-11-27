@@ -68,12 +68,12 @@ test("EXP and badge grants lock the member row before checking approval", () => 
   const expStart = hardeningMigration.indexOf("create or replace function public.admin_grant_exp");
   const expEnd = hardeningMigration.indexOf("create or replace function public.admin_grant_badge", expStart);
   const expBlock = hardeningMigration.slice(expStart, expEnd);
-  assert.match(expBlock, /from public[.]profiles[\\s\\S]*for update/i);
+  assert.match(expBlock, /from public[.]profiles[\s\S]*for update/i);
 
   const badgeStart = hardeningMigration.indexOf("create or replace function public.admin_grant_badge");
   const badgeEnd = hardeningMigration.indexOf("create or replace function public.admin_revoke_badge", badgeStart);
   const badgeBlock = hardeningMigration.slice(badgeStart, badgeEnd);
-  assert.match(badgeBlock, /from public[.]profiles[\\s\\S]*for update/i);
+  assert.match(badgeBlock, /from public[.]profiles[\s\S]*for update/i);
 });
 
 test("badge revocation is recorded in the administrative audit log", () => {
