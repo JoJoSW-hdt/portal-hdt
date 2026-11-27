@@ -11,6 +11,7 @@ test("the SECURITY DEFINER profile edit RPC requires an approved profile", () =>
   assert.match(migration, /create or replace function public\.update_my_public_profile/i);
   assert.match(migration, /security definer/i);
   assert.match(migration, /p\.status\s*=\s*'approved'/i);
+  assert.match(migration, /Somente membros aprovados podem editar o perfil/i);
   assert.match(migration, /revoke all on function public\.update_my_public_profile\(text, text, text\) from public, anon/i);
   assert.match(migration, /grant execute on function public\.update_my_public_profile\(text, text, text\) to authenticated/i);
 });
