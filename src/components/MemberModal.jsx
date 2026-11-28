@@ -178,29 +178,43 @@ function MemberModal({
                 <p>Alterações restritas ao Fundador e registradas no histórico.</p>
               </div>
             </div>
-            <label>
-              Cargo administrativo
-              <select value={role} onChange={(event) => setRole(event.target.value)}>
-                <option value="member">Membro</option>
-                <option value="staff">Staff</option>
-                <option value="admin">Administrador</option>
-                <option value="moderator">Moderador</option>
-                <option value="organizer">Organizador</option>
-              </select>
-            </label>
-            <button className="subtle-btn" disabled={busy || role === member.role} onClick={() => save("role")}>
-              {busy ? "Salvando..." : "Salvar cargo"}
-            </button>
-            <label>
-              Rank da comunidade
-              <select value={rankId} onChange={(event) => setRankId(event.target.value)}>
-                <option value="">Sem patente atribuída</option>
-                {ranks.map((rank) => <option key={rank.id} value={rank.id}>{rank.name}</option>)}
-              </select>
-            </label>
-            <button className="subtle-btn" disabled={busy || rankId === (member.community_rank_id || "")} onClick={() => save("rank")}>
-              Salvar patente
-            </button>
+            {member.role === "founder" ? (
+              <p className="member-admin-error">O cargo Founder é protegido e não pode ser alterado por esta tela.</p>
+            ) : member.status !== "approved" ? (
+              <p className="member-admin-error">Atribuição de cargo disponível apenas para membros aprovados.</p>
+            ) : (
+              <>
+                <label>
+                  Cargo administrativo
+                  <select value={role} onChange={(event) => setRole(event.target.value)}>
+                    <option value="member">Membro</option>
+                    <option value="staff">Staff</option>
+                    <option value="admin">Administrador</option>
+                    <option value="moderator">Moderador</option>
+                    <option value="organizer">Organizador</option>
+                  </select>
+                </label>
+                <button className="subtle-btn" disabled={busy || role === member.role} onClick={() => save("role")}>
+                  {busy ? "Salvando..." : "Salvar cargo"}
+                </button>
+              </>
+            )}
+            {member.status === "approved" ? (
+              <>
+                <label>
+                  Rank da comunidade
+                  <select value={rankId} onChange={(event) => setRankId(event.target.value)}>
+                    <option value="">Sem patente atribuída</option>
+                    {ranks.map((rank) => <option key={rank.id} value={rank.id}>{rank.name}</option>)}
+                  </select>
+                </label>
+                <button className="subtle-btn" disabled={busy || rankId === (member.community_rank_id || "")} onClick={() => save("rank")}>
+                  Salvar patente
+                </button>
+              </>
+            ) : (
+              <p className="empty-copy">A patente pode ser administrada após a aprovação do membro.</p>
+            )}
             {error && <p className="member-admin-error">{error}</p>}
             <div className="member-admin-history">
               <strong>Histórico de alterações</strong>

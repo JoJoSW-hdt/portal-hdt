@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { usePortalPermissions } from "../src/hooks/usePortalPermissions.js";
 import { resolveNewsPublishedAt } from "../src/lib/newsSchedule.js";
 import { fetchAuthenticatedProfile } from "../src/lib/profileData.js";
+import { getUpcomingEvents } from "../src/lib/eventSchedule.js";
 
 test("pending and suspended profiles receive no administrative permissions", () => {
   for (const status of ["pending", "suspended", "rejected"]) {
@@ -85,4 +86,20 @@ test("staff permissions fail closed when the permissions row cannot be read", as
   assert.equal(result.staffPermissions.approve_members, false);
   assert.equal(result.staffPermissions.publish_news, false);
   assert.equal(result.error.message, "Permission lookup failed");
+});
+
+test("homepage event list includes upcoming and ongoing events but excludes past and drafts", () => {
+  const now = new Date("2026-11-27T12:00:00.000Z");
+  const events = [
+    { id: "past", status: "published", starts_at: "2026-11-20T12:00:00.000Z" },
+    { id: "ongoing", status: "published", starts_at: "2026-11-27T10:00:00.000Z", ends_at: "2026-11-27T14:00:00.000Z" },
+    { id: "upcoming", status: "published", starts_at: "2026-12-01T12:00:00.000Z" },
+    { id: "draft", status: "draft", starts_at: "2026-12-02T12:00:00.000Z" },
+    { id: "invalid", status: "published", starts_at: "not-a-date" },
+  ];
+
+  assert.deepEqual(
+    getUpcomingEvents(events, now).map((event) => event.id),
+    ["ongoing", "upcoming"],
+  );
 });

@@ -118,7 +118,7 @@ export function usePortalActions({
   }
 
   async function deleteBadge(id) {
-    if (!confirm("Excluir esta badge do catálogo? Ela também será retirada dos perfis.")) return;
+    if (!confirm("Excluir esta badge do catálogo? Badges que ainda aparecem nos perfis não podem ser excluídas. Retire as conquistas primeiro para preservar os registros existentes.")) return;
     try {
       await deleteBadgeRecord(supabase, id);
       setMessage("Badge excluída.");

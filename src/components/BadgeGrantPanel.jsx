@@ -1,12 +1,14 @@
 import React from "react";
 
 export default function BadgeGrantPanel({ members, badges, awards, rarityNames, grantMember, grantBadge, onMemberChange, onBadgeChange, onGrant, onRevoke }) {
+  const approvedMembers = members.filter(member => member.status === "approved");
+
   return (
     <section className="content">
       <div className="panel">
-        <div className="panel-heading"><div><h3>Conceder uma conquista</h3><p>Escolha um membro e uma badge do catálogo.</p></div></div>
+        <div className="panel-heading"><div><h3>Conceder uma conquista</h3><p>Escolha um membro aprovado e uma badge do catálogo.</p></div></div>
         <div className="grant-form">
-          <label>Membro<select value={grantMember} onChange={e=>onMemberChange(e.target.value)}><option value="">Selecione um membro</option>{members.map(m=><option key={m.id} value={m.id}>{m.display_name} (@{m.username})</option>)}</select></label>
+          <label>Membro<select value={grantMember} onChange={e=>onMemberChange(e.target.value)}><option value="">Selecione um membro</option>{approvedMembers.map(m=><option key={m.id} value={m.id}>{m.display_name} (@{m.username})</option>)}</select></label>
           <label>Badge<select value={grantBadge} onChange={e=>onBadgeChange(e.target.value)}><option value="">Selecione uma badge</option>{badges.map(b=><option key={b.id} value={b.id}>{b.name} · {rarityNames[b.rarity]}</option>)}</select></label>
           <button className="primary-btn" disabled={!grantMember||!grantBadge} onClick={onGrant}>Conceder badge</button>
         </div>
