@@ -17,6 +17,7 @@ export default function PublicPortalContent({
   setAuthMode,
   supabase,
   setMessage,
+  message,
   canPublish,
   newsPosts,
   events,
@@ -57,7 +58,7 @@ export default function PublicPortalContent({
           onProfile={setSelectedMember}
         />
       </>}
-      {view === "community" && <CommunityPosts supabase={supabase} profile={session ? profile : null} canModerate={canPublish}/>}
+      {view === "community" && <CommunityPosts supabase={supabase} profile={session ? profile : null} canModerate={canPublish} onMessage={setMessage}/>}
       {view === "news" && <PublicNewsPage newsPosts={newsPosts}/>}
       {view === "events" && <PublicEventsPage events={events}/>}
       {view === "members" && <PublicMemberDirectory members={filtered.filter(member => member.status === "approved")} awards={awards} search={search} onSearchChange={setSearch} onBadge={setSelectedBadge} onProfile={setSelectedMember}/>}
