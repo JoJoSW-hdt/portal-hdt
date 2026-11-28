@@ -104,3 +104,16 @@ test("rank-promotion reviews lock pending requests and approved member rows", ()
   assert.match(block, /from public[.]profiles[\s\S]*for update/i);
   assert.match(block, /p_approve is null/i);
 });
+
+const badgeAuditConstraintMigration = readFileSync(
+  new URL("../supabase/migrations/20261128140000_allow_badge_revoked_audit_action.sql", import.meta.url),
+  "utf8",
+);
+
+test("badge revocation audit action is accepted by the database constraint", () => {
+  assert.match(badgeAuditConstraintMigration, /drop constraint if exists member_admin_audit_action_check/i);
+  assert.match(
+    badgeAuditConstraintMigration,
+    /check\s*\(action in \('role_changed', 'rank_changed', 'access_revoked', 'badge_revoked'\)\)/i,
+  );
+});
