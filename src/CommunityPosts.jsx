@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import RichTextEditor, { cleanHtml } from "./RichTextEditor";
 import { fetchCommunityFeed } from "./lib/communityData";
 import { Heart, MessageCircle, Image as ImageIcon, Send, Pencil, Trash2, X, Newspaper } from "lucide-react";
@@ -15,36 +15,52 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   const [busy,setBusy]=useState(false);
   const [editing,setEditing]=useState(null);
   const [composer,setComposer]=useState(false);
+  const requestVersion=useRef(0);
+  const loadingMoreRef=useRef(false);
   const canInteract=profile?.status==="approved";
 
   async function refresh(){
+    const requestId=++requestVersion.current;
+    loadingMoreRef.current=false;
+    setLoadingMore(false);
     setLoading(true);
     try {
       const visibleCount=Math.max(posts.length,PAGE_SIZE);
       const feed = await fetchCommunityFeed(supabase,{offset:0,limit:visibleCount});
+      if(requestId!==requestVersion.current)return;
       setPosts(feed.posts);
       setHasMore(feed.hasMore);
     } catch (error) {
-      onMessage(error.message);
+      if(requestId===requestVersion.current)onMessage(error.message);
     } finally {
-      setLoading(false);
+      if(requestId===requestVersion.current)setLoading(false);
     }
   }
-  useEffect(()=>{refresh();},[supabase]);
+  useEffect(()=>{
+    refresh();
+    return ()=>{requestVersion.current+=1;};
+  },[supabase]);
 
   async function loadMore(){
+    if(loading||loadingMoreRef.current||!hasMore)return;
+    loadingMoreRef.current=true;
+    const requestId=++requestVersion.current;
     setLoadingMore(true);
     try {
       const feed = await fetchCommunityFeed(supabase,{offset:posts.length,limit:PAGE_SIZE});
+      if(requestId!==requestVersion.current)return;
       setPosts(current=>{
         const known=new Set(current.map(post=>post.id));
         return [...current,...feed.posts.filter(post=>!known.has(post.id))];
       });
       setHasMore(feed.hasMore);
     } catch(error) {
-      onMessage(error.message);
+      if(requestId===requestVersion.current)onMessage(error.message);
     } finally {
-      setLoadingMore(false);
+      if(requestId===requestVersion.current){
+        loadingMoreRef.current=false;
+        setLoadingMore(false);
+      }
     }
   }
 
