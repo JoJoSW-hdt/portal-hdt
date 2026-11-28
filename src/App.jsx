@@ -57,7 +57,6 @@ export default function App(){
 >
   <PublicPortalContent
     view={view} session={session} profile={profile} setShowAuth={setShowAuth}
-    message={message}
     setAuthMode={setAuthMode} supabase={supabase} setMessage={setMessage}
     canPublish={canPublish} newsPosts={newsPosts} events={events} members={members}
     awards={awards} badges={badges} setView={setView}
