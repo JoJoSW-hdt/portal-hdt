@@ -53,10 +53,7 @@ export async function fetchCommunityFeed(supabase, { offset = 0, limit = 10 } = 
   const uniqueProfileIds = [...new Set(profileIds)];
 
   const profilesResult = uniqueProfileIds.length
-    ? await supabase
-        .from("profiles")
-        .select("id,display_name,username,avatar_url,role")
-        .in("id", uniqueProfileIds)
+    ? await supabase.from("profiles").select("id,display_name,username,avatar_url,role").in("id", uniqueProfileIds)
     : { data: [], error: null };
 
   const error = reactionsResult.error || commentsResult.error || profilesResult.error;
