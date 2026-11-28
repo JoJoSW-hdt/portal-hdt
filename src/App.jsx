@@ -50,13 +50,14 @@ export default function App(){
   profile={profile} session={session} roleNames={roleNames} canEnterAdmin={canEnterAdmin}
   view={view} setView={setView} setAdminMode={setAdminMode} setDiscord={setDiscord}
   setTagline={setTagline} supabase={supabase} setShowAuth={setShowAuth} setAuthMode={setAuthMode}
-  showAuth={showAuth}
+  showAuth={showAuth} message={message} setMessage={setMessage}
   authModalProps={{authMode,setAuthMode,onClose:()=>setShowAuth(false),onSubmit:submitAuth,username,setUsername,displayName,setDisplayName,email,setEmail,password,setPassword,busy,message}}
   selectedBadge={selectedBadge} setSelectedBadge={setSelectedBadge} selectedMember={selectedMember}
   awards={awards} ranks={ranks} manageMember={manageMember} revokeMemberAccess={revokeMemberAccess}
 >
   <PublicPortalContent
     view={view} session={session} profile={profile} setShowAuth={setShowAuth}
+    message={message}
     setAuthMode={setAuthMode} supabase={supabase} setMessage={setMessage}
     canPublish={canPublish} newsPosts={newsPosts} events={events} members={members}
     awards={awards} badges={badges} setView={setView}
