@@ -1,5 +1,5 @@
 import React from "react";
-import { UserRound, ShieldCheck, LogOut } from "lucide-react";
+import { UserRound, ShieldCheck, LogOut, AlertCircle, X } from "lucide-react";
 import { Brand, BadgeModal } from "./PortalShared";
 import AuthModal from "./AuthModal";
 import MemberModal from "./MemberModal";
@@ -8,6 +8,7 @@ export default function PublicPortalLayout({
   profile, session, roleNames, canEnterAdmin, view, setView, setAdminMode,
   setDiscord, setTagline, supabase, setShowAuth, setAuthMode, showAuth,
   authModalProps, selectedBadge, setSelectedBadge, selectedMember, awards,
+  message, setMessage,
   ranks, manageMember, revokeMemberAccess, children
 }) {
   return <div className="public-site">
@@ -34,7 +35,10 @@ export default function PublicPortalLayout({
         </div>
       </details> : <button className="primary-btn header-login" onClick={()=>{setShowAuth(true);setAuthMode("login")}}>Entrar no portal</button>}
     </header>
-    <main className="public-main">{children}</main>
+    <main className="public-main">
+      {message && <div className="global-notice" role="status"><AlertCircle size={16}/><span>{message}</span><button type="button" aria-label="Dispensar aviso" onClick={() => setMessage("")}><X size={15}/></button></div>}
+      {children}
+    </main>
     <footer className="public-footer">HERÓIS DO TEMPO · UMA CASA PARA AVENTUREIROS</footer>
     {showAuth&&<AuthModal {...authModalProps}/>}
     <BadgeModal award={selectedBadge} onClose={()=>setSelectedBadge(null)}/>
