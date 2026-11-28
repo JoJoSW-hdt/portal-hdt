@@ -25,12 +25,12 @@ export function cleanHtml(html) {
         } else if (child.tagName === "IMG" && name === "src") {
           if (!isAllowedCommunityImageUrl(attr.value)) child.removeAttribute(attr.name);
         } else if (name === "style") {
-          const match = attr.value.match(/text-align\\s*:\\s*(left|center|right|justify)/i);
+          const match = attr.value.match(/text-align\s*:\s*(left|center|right|justify)/i);
           if (match) child.setAttribute("style", `text-align:${match[1].toLowerCase()}`);
           else child.removeAttribute(attr.name);
         } else if (child.tagName === "IMG" && name === "alt") {
           // Keep accessible image descriptions.
-        } else if (child.tagName === "IMG" && name === "width" && /^\\d{1,3}%?$/.test(attr.value)) {
+        } else if (child.tagName === "IMG" && name === "width" && /^\d{1,3}%?$/.test(attr.value)) {
           // Keep bounded numeric or percentage widths.
         } else child.removeAttribute(attr.name);
       });
