@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Image as ImageIcon, Bold, Italic, Underline, List, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { isAllowedCommunityImageUrl } from "./lib/communityImages";
+
 const allowedTags = new Set(["P","BR","STRONG","B","EM","I","U","UL","OL","LI","H2","H3","BLOCKQUOTE","A","IMG","DIV"]);
 export function cleanHtml(html) {
   const doc = new DOMParser().parseFromString(html || "", "text/html");
@@ -21,16 +23,14 @@ export function cleanHtml(html) {
             else child.setAttribute("rel", "noopener noreferrer");
           } catch { child.removeAttribute(attr.name); }
         } else if (child.tagName === "IMG" && name === "src") {
-          try {
-            if (new URL(attr.value, window.location.origin).protocol !== "https:") child.removeAttribute(attr.name);
-          } catch { child.removeAttribute(attr.name); }
+          if (!isAllowedCommunityImageUrl(attr.value)) child.removeAttribute(attr.name);
         } else if (name === "style") {
-          const match = attr.value.match(/text-align\s*:\s*(left|center|right|justify)/i);
+          const match = attr.value.match(/text-align\\s*:\\s*(left|center|right|justify)/i);
           if (match) child.setAttribute("style", `text-align:${match[1].toLowerCase()}`);
           else child.removeAttribute(attr.name);
         } else if (child.tagName === "IMG" && name === "alt") {
           // Keep accessible image descriptions.
-        } else if (child.tagName === "IMG" && name === "width" && /^\d{1,3}%?$/.test(attr.value)) {
+        } else if (child.tagName === "IMG" && name === "width" && /^\\d{1,3}%?$/.test(attr.value)) {
           // Keep bounded numeric or percentage widths.
         } else child.removeAttribute(attr.name);
       });
@@ -79,4 +79,3 @@ export default function RichTextEditor({initialHtml="",onSave,onCancel,busy=fals
     <div className="editor-footer"><small>{uploading?"Enviando imagem...":"Você pode formatar o texto e inserir imagens entre os parágrafos."}</small><div>{onCancel&&<button type="button" className="outline-btn" onClick={onCancel}>Cancelar</button>}<button className="primary-btn" disabled={busy||uploading}>{busy?"Salvando...":submitLabel}</button></div></div>
   </form>;
 }
-
