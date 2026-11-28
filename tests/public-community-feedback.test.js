@@ -9,7 +9,7 @@ const content = readFileSync(new URL("../src/components/PublicPortalContent.jsx"
 test("public portal receives and renders dismissible feedback notices", () => {
   assert.match(app, /showAuth=\{showAuth\} message=\{message\} setMessage=\{setMessage\}/);
   assert.match(layout, /message && <div className="global-notice" role="status"/);
-  assert.match(layout, /onClick=\{\(\) => setMessage\("\"\)\}/);
+  assert.match(layout, /onClick=\{\(\) => setMessage\("\"\"\)\}/);
 });
 
 test("community actions report feedback on both home and community views", () => {
