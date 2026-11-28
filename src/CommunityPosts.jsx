@@ -20,7 +20,8 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   async function refresh(){
     setLoading(true);
     try {
-      const feed = await fetchCommunityFeed(supabase,{offset:0,limit:PAGE_SIZE});
+      const visibleCount=Math.max(posts.length,PAGE_SIZE);
+      const feed = await fetchCommunityFeed(supabase,{offset:0,limit:visibleCount});
       setPosts(feed.posts);
       setHasMore(feed.hasMore);
     } catch (error) {
