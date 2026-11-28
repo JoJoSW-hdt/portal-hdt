@@ -21,6 +21,8 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
 
   async function refresh(){
     const requestId=++requestVersion.current;
+    loadingMoreRef.current=false;
+    setLoadingMore(false);
     setLoading(true);
     try {
       const visibleCount=Math.max(posts.length,PAGE_SIZE);
@@ -40,7 +42,7 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
   },[supabase]);
 
   async function loadMore(){
-    if(loadingMoreRef.current||!hasMore)return;
+    if(loading||loadingMoreRef.current||!hasMore)return;
     loadingMoreRef.current=true;
     const requestId=++requestVersion.current;
     setLoadingMore(true);
@@ -55,8 +57,10 @@ export default function CommunityPosts({supabase,profile,canModerate=false,onMes
     } catch(error) {
       if(requestId===requestVersion.current)onMessage(error.message);
     } finally {
-      loadingMoreRef.current=false;
-      if(requestId===requestVersion.current)setLoadingMore(false);
+      if(requestId===requestVersion.current){
+        loadingMoreRef.current=false;
+        setLoadingMore(false);
+      }
     }
   }
 
