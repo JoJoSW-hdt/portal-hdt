@@ -17,7 +17,6 @@ export default function PublicPortalContent({
   setAuthMode,
   supabase,
   setMessage,
-  message,
   canPublish,
   newsPosts,
   events,
